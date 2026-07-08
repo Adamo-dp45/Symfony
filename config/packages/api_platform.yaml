@@ -1,0 +1,32 @@
+api_platform:
+    title: API Platform
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+    show_webby: false # Permet d'activer ou désactiver l'arraigné
+    # enable_swagger_ui: false -- Permet de désactiver la documentation de swagger
+    # enable_docs: false -- Si on veut empêcher même la génération des données json de '/api/docs.json'
+    # enable_re_doc: false -- !! aussi désactiver 'redoc'
+    use_symfony_listeners: true # Permet d'utiliser les controller, active l'intégration avec le système de routing Symfony et l’enregistrement automatique des controllers comme services
+    # pagination_enabled: false -- Ou le faire dans l'entité
+
+    patch_formats: # Pour activer le format 'patch' ou l'option 'inputFormats'
+        json: ['application/merge-patch+json']
+        jsonapi: ['application/vnd.api+json']
+
+    # formats:
+    #    jsonld: ["application/ld+json"]
+    #    jsonhal: ["application/hal+json"]
+    #    jsonapi: ["application/vnd.api+json"]
+    #    json: ["application/json"]
+    #    xml: ["application/xml", "text/xml"]
+    #    yaml: ["application/x-yaml"]
+    #    csv: ["text/csv"]
+    #    html: ["text/html"]
+
+    # graphql:
+    #    enabled: false *Désactiver uniquement GraphQL*
+    #    graphiql: -- Désactiver la doc
+    #        enabled: false

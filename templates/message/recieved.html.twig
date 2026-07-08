@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Boîte de reception | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="display-6">Messages reçu</h1>
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Boîte de reception</h2>
+            <p>
+                Reçu : {{ app.user.received|length }}
+            </p>
+        </div>
+        <div class="col-md-3">De</div>
+        <div class="col-md-3">Sujet</div>
+        <div class="col-md-3">Date</div>
+        <div class="col-md-3">Action</div>
+        {% for message in app.user.received %}
+            {% if message.isRead == 0 %}
+                {% set bold = 'fw-bold' %}
+            {% else %}
+                {% set bold = '' %}
+            {% endif %}
+            <div class="col-md-3 {{ bold }}">{{ message.sender.email }}</div>
+            <div class="col-md-3 {{ bold }}">
+                <a href="{{ path('message.read', {id: message}) }}">
+                    {{ message.subjet }}
+                </a>
+            </div>
+            <div class="col-md-3 {{ bold }}">{{ message.createdAt|date("m/d/Y") }}</div>
+            <div class="col-md-3 {{ bold }}">
+                <a href="{{ path('message.delete') }}" class="btn btn-danger">Svg supprimer</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

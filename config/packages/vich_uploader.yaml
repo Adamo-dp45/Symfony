@@ -1,0 +1,34 @@
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+        recipes:
+            uri_prefix: /images/recipes
+            upload_destination: '%kernel.project_dir%/public/images/recipes'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer # Permet de changer le nom du fichier
+
+            # inject_on_load: false -- Par défaut 'false' le fichier doit être injecté dans l'entité téléchargeable lors de son chargement depuis le magasin de données
+            # delete_on_update: true -- !! 'true' le fichier doit'il être supprimé lorsqu'un nouveau fichier est téléchargé
+            # delete_on_remove: true -- !! 'true' le fichier doit'il être supprimé lorsque l'entité est supprimée
+
+        properties:
+            uri_prefix: /images/properties
+            upload_destination: '%kernel.project_dir%/public/images/properties'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+
+        images:
+            uri_prefix: /images/images
+            upload_destination: '%kernel.project_dir%/public/images/images'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+
+        posts:
+            uri_prefix: /images/posts
+            upload_destination: '%kernel.project_dir%/public/images/posts'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+
+    #mappings:
+    #    products:
+    #        uri_prefix: /images/products
+    #        upload_destination: '%kernel.project_dir%/public/images/products'
+    #        namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+

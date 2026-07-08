@@ -1,0 +1,18 @@
+{
+  "main.jsx": {
+    "file": "main.jsx-B5IHJvNP.js",
+    "name": "main.jsx",
+    "src": "main.jsx",
+    "isEntry": true,
+    "css": [
+      "main-BeKxpIKi.css"
+    ],
+    "assets": [
+      "react-CHdo91hT.svg"
+    ]
+  },
+  "vite/react.svg": {
+    "file": "react-CHdo91hT.svg",
+    "src": "vite/react.svg"
+  }
+}

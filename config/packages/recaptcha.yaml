@@ -1,0 +1,11 @@
+recaptcha:
+    key: '%env(GOOGLE_RECAPTCHA_KEY)%'
+    secret: '%env(GOOGLE_RECAPTCHA_SECRET)%'
+
+# Ou on pourrais utiliser le système de service ..
+# services:
+#  recaptcha_type:
+#    class: Damo\RecaptchaBundle\Type\RecaptchaSubmitType
+#    tags: ['form.type']
+#    arguments:
+#      $key: GSSLDJDHsddd4555 -- Ensuite injecter dans le constructeur

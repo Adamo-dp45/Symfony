@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}UX | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="lead">Typed</div>
+    <div class="p-5" style="font-size: 1.3em;">
+        {% set strings = [
+            'I ❤️ Symfony UX!',
+            'Symfony UX Typed loves to type',
+            'Symfony UX Typed and backspace',
+            'Control the speed',
+            'Control the cursor',
+            'Control your destiny!!!',
+            'Control your destiny... sort of',
+        ] %}
+        <span
+            data-controller="symfony--ux-typed"
+            data-symfony--ux-typed-loop-value="true"
+            data-symfony--ux-typed-show-cursor-value="true"
+            data-symfony--ux-typed-cursor-char-value="✨"
+            data-symfony--ux-typed-strings-value="{{ strings|json_encode|e('html_attr') }}"
+        ></span>
+    </div>
+
+    <div class="lead">Chart</div>
+    <div style="height: 300px;" class="mb-5">
+        {{ render_chart(chart) }}
+    </div>
+</div>
+{% endblock %}

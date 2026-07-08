@@ -1,0 +1,62 @@
+# Documentation on how to configure the bundle can be found at: https://symfony.com/doc/current/bundles/LiipImagineBundle/basic-usage.html
+liip_imagine:
+    # valid drivers options include "gd" or "gmagick" or "imagick"
+    driver: "gd"
+
+    # data_loader: default - !!
+    # cache: default - !!
+
+    # twig: - !!
+    #    mode: lazy - Plus performant que legacy (désactivable en version 3), Génère les URLs dans Twig via un service runtime, pas à chaque chargement de page
+
+    # resolvers:
+    #    default:
+    #        web_path:
+    #            web_root: '%kernel.project_dir%/public'
+    #            cache_prefix: 'media/cache'
+    #            no_privacy_signatures: false
+
+    # loaders: - Si les images ne sont pas dans `public/` mais dans un bucket S3, on peut le configurer 
+    #    default:
+    #        filesystem:
+    #            data_root: '%kernel.project_dir%/public'
+    #            stream: false
+
+    # webp: - Pour générer automatiquement une version WebP en plus du WebP, détectable par navigateur
+    #    generate: false - activer la génération WebP
+    #    quality: 80
+    #    cache: default
+    #    data_loader: default
+    #    post_processors: [] - [jpegoptim, optipng]
+
+    # default_filter_set_settings:
+    #    quality: 90 - Qualité jpeg/png par défaut
+    #    animated: false
+    #    format: ~
+    #    filters: []
+    #    post_processors: []
+
+    filter_sets:
+        thumb: # Nom du filtre
+            # cache: ~
+            quality: 85
+            # format: jpg - On peut indiquer le format
+            filters: # Le filtre à appliqué
+                thumbnail: # Permet de générer une miniature
+                    size: [360, 230] # Taille le l'image
+                    mode: outbound # Croppe au centre, on a aussi 'inset', 'relative_resize'
+                    # allow_upscale: true -- Agrandi l'image si elle est trop petite
+                # strip: ~ - Enlève les métadonnées (EXIF), utile pour alléger les images
+                # interlace: progressive - !!
+
+                # background: - Peut centrer l’image sur un fond (utile pour des bordures uniformes)
+                #    size: [120, 120]
+                #    color: '#fff'
+                #    position: center
+        medium:
+            quality: 85
+            format: jpg
+            filters:
+                thumbnail:
+                    size: [800, 530] # Taille le l'image
+                    mode: outbound # Croppe au centre au autre

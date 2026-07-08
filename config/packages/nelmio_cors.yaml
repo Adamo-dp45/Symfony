@@ -1,0 +1,16 @@
+nelmio_cors:
+    defaults:
+        origin_regex: true
+        allow_origin: ['%env(CORS_ALLOW_ORIGIN)%', http://localhost:5173] # Pour autoriser d'autres nom de domaines
+        allow_credentials: true # !! autoriser l'envoi de cookie
+        allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
+        allow_headers: ['Content-Type', 'Authorization'] # 'X-Requested-With'
+        expose_headers: ['Link']
+        max_age: 3600
+    paths:
+        '^/': null
+        '^/fr/api/': # Pour 'jwt'
+            allow_origin: ['*'] # ex: 'htt..localhost:3000' pour react
+            allow_headers: ['*']
+            allow_methods: ['POST', 'PUT', 'GET', 'DELETE', 'PATCH']
+            max_age: 3600

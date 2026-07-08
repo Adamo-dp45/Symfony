@@ -1,0 +1,29 @@
+framework:
+    workflows: # null par défaut
+        blog_publishing:
+            type: 'state_machine' # Peut être dans un seule état à la fois, 'workflow' plusieurs états
+            marking_store: # On créer sur l'entité Post currentState
+                type: 'method'
+                property: 'currentState'
+            supports: # Ce que l'on supporte, l'entité qui va pourvoir être utilisé et qui va utiliser ce workflow
+                - App\Entity\Post
+            initial_marking: draft # Permet de spécifier l'état initial, Si on le met au niveau de Post on peut s'en passer ici
+            places: # Nom des états
+                - draft
+                - reviewed
+                - published
+                - rejected
+            transitions: # Permet de passer d'un état à un autre
+                to_review: # Permet de passer de draft à reviewed
+                    from: draft
+                    to: reviewed
+                publish:
+                    # guard: is_granted('ROLE_ADMIN') -- On ne peut publier l'article que si on n'est admin - On peut le faire aussi via des évènements - BlogPublishingSubscriber
+                    from: reviewed
+                    to: published
+                    metadata: # On peut rajouter, on ne peut publier qu'a des heures particuliers - Traitement dans BlogPublishingSubscriber - guardPublish
+                        hours: [19, 20] # On ne peut publier que de 19H à 20H
+                reject:
+                    from: [reviewed, draft] # L'article peut être rejété si on n'est en reviewed ou draft
+                    to: rejected
+# On utiliser cette structure pour générer un shema - php bin/console workflow:dump blog_publishing

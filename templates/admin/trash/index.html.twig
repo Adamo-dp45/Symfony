@@ -1,0 +1,45 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin - Corbeille | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="mb-4 display-6">Corbeille</h1>
+    <div class="lead mb-3">Categorie supprimer</div>
+
+    {% if categories is empty %}
+        <div class="alert alert-info">Aucune categorie dans la corbeille</div>
+    {% else %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>nom</th>
+                    <th>Supprimé le</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr>
+                        <td>{{ category.id }}</td>
+                        <td>{{ category.name }}</td>
+                        <td>{{ category.deleteAt|date('d/m/Y H:i') }}</td>
+                        <td>
+                            <form method="post" action="{{ path('admin.category.restore', {id: category.id}) }}" style="display:inline-block;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('restore_' ~ category.id) }}">
+                                <button class="btn btn-sm btn-success">Restaurer</button>
+                            </form>
+                            <form method="post" action="{{ path('admin.category.delete', {id: category.id}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer définitivement ?');">
+                               {# <input type="hidden" name="_token" value="{{ csrf_token('delete_' ~ category.id) }}"> #}
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button class="btn btn-sm btn-danger">Supprimer définitivement</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}

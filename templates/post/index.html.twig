@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Article | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <p>
+        {% if workflow_can(post, 'publish') %} <!-- Ce bouton sera affiché si l'article peut être publier par rapport à notre workflow -->
+        <button>Publier</button>
+        {% endif %}
+
+        <ul>
+        {% for transition in workflow_transitions(post) %} <!-- Lister les transitions -->
+            <li>{{ transition.name }}</li>
+        {% endfor %}
+        </ul>
+
+        <ul>
+            {% for blocker in workflow_transition_blockers(post, 'publish') %} <!-- Liste tous les qui empêchent d'aller à publish -->
+            <li>{{ blocker.message }}</li>
+            {% endfor %}
+        </ul>
+
+        {% if workflow_has_marked_place(post, 'reviewed') %} <!-- Est ce que l'article est en reviewed -->
+        Votre article à été passé revue
+        {% endif %}
+    </p>
+</div>
+{% endblock %}

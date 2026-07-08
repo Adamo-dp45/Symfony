@@ -1,0 +1,18 @@
+{% block recaptcha_submit_widget %}
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        function {{ id }}onRecapatchaSubmit(token) {
+            let el = document.getElementById('{{ id }}')
+            while (el.parentElement !== null) { // Tant que le parent de l'élément n'est pas un formulaire on continue à remonté
+                if(el.tagName === 'FORM') {
+                    el.submit()
+                    break
+                }
+                el = el.parentElement
+            }
+        }
+    </script>
+    {% set label = button %}
+    {% set attr = attr | merge({class: (attr.class|default('')) ~ ' g-recaptcha', 'data-sitekey': key, 'data-callback': id ~ 'onRecapatchaSubmit'}) %}
+    {% block submit_widget %}{% endblock %}
+{% endblock %}

@@ -1,0 +1,19 @@
+services:
+    recaptcha.type:
+        class: Damo\RecaptchaBundle\Type\RecaptchaSubmitType
+        tags: ['form.type']
+        arguments:
+            $key: '%recaptcha.key%' # Le paramètre qu'on a définie dans RecaptchaExtension
+
+    recaptcha.validator: # On configure le RecaptchaValidator
+        class: Damo\RecaptchaBundle\Constraints\RecaptchaValidator
+        tags: ['validator.constraint_validator']
+        autowire: true
+
+    ReCaptcha\ReCaptcha: # On configure la class recaptcha de google
+        class: ReCaptcha\ReCaptcha
+        arguments:
+            $secret: '%recaptcha.secret%'
+            $requestMethod: '@ReCaptcha\RequestMethod'
+    ReCaptcha\RequestMethod: '@ReCaptcha\RequestMethod\CurlPost'
+    ReCaptcha\RequestMethod\CurlPost: ~ # Utilise le même nom de class

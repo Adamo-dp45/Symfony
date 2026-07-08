@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accès refusé{% endblock %}
+
+{% block body %}
+    <div class="error-page error-403">
+        <h1>403 – Accès interdit</h1>
+        <p>Désolé, vous n’avez pas les permissions nécessaires pour accéder à cette page.</p>
+        <a href="{{ path('home') }}">Retour à l’accueil</a>
+        <hr>
+        <p><small>Code : {{ status_code }} — {{ status_text }}</small></p>
+    </div>
+{% endblock %}

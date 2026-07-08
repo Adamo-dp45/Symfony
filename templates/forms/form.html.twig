@@ -1,0 +1,26 @@
+{% block captcha_row %}
+    <div class="form-group">
+        <puzzle-captcha
+            {# -- Ou
+            width="{{ attr.width }}"
+            height="{{ attr.height }}"
+            piece-width="{{ attr.piece-width }}"
+            piece-height="{{ attr.piece-height }}"
+            src="{{ attr.src }}"
+            #}
+
+            {%- for attrname, attrvalue in attr -%}
+                {{- (" " ~ attrname ~ "=\"" ~ attrvalue ~ "\"") |raw('html') }}
+            {%- endfor -%}
+        >
+            {# {% for child in form.children %}
+                {{ form_widget(child) }}
+            {% endfor %} #}
+            {{ form_widget(form.challenge, {value: challenge}) }}
+            {{ form_widget(form.answer) }}
+        </puzzle-captcha>
+
+        {{ form_help(form) }}
+        {{ form_errors(form) }}
+    </div>
+{% endblock %}

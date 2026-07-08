@@ -1,0 +1,7 @@
+# framework:
+#    rate_limiter:
+#        hello:
+#            policy: 'fixed_window' -- Ou 'sliding_window' politique flexible et évite blocages massifs
+#            limit: 2 -- Le nombre de tentatives maximum
+#            interval: '15 minutes' -- La période de blocage
+#            cache_pool: cache.app -- Pour la sauvegarder dans le cache

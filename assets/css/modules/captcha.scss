@@ -1,0 +1,32 @@
+.captcha {
+    display: block;
+    border: 2px solid #CCC;
+    width: var(--width);
+    height: var(--height);
+    background: var(--image);
+    position: relative;
+    touch-action: none; /* Pour éviter le scroll dans le cas des android */
+}
+
+.captcha-piece {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--piece-width);
+    height: var(--piece-height);
+    background: var(--image) top right;
+}
+
+.captcha-piece::after {
+    content: '';
+    background: url(../puzzle-piece.png) no-repeat;
+    position: absolute;
+    width: calc(var(--piece-width) + 10px);
+    height: calc(var(--piece-height) + 10px);
+    transform: translate(-4px, 0px);
+    transition: .3s;
+}
+
+.captcha:not(.captcha-waiting-interaction) .captcha-piece:not(.is-moving)::after {
+    opacity: .8s; // .3s
+}

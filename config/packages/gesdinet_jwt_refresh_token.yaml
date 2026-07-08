@@ -1,0 +1,7 @@
+gesdinet_jwt_refresh_token:
+    refresh_token_class: App\Entity\RefreshToken
+
+    # ttl: 2592000 -- Pour déterminer la durée de vie du refresh token en secondes '30j'
+    # ttl_update: true -- !! étendre la 'ttl' quand on utilise un refresh token ce qui vas prolonger sa durée de vie
+    # single_use: true -- !! utiliser le refresh token qu'une seule fois et sera invalide après usage
+    # token_parameter_name: refreshToken -- Le paramètre attendu dans la requête

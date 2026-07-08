@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Symfony{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+            <style>
+                .grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    grid-gap: 20px;
+                }
+
+                .filter {
+                    display: block;
+                    position: sticky;
+                    top: 20px;
+                }
+
+                .is-loading::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: #FFF;
+                    opacity: .5;
+                    z-index: 4;
+                }
+
+                .is-loading .spinner-border {
+                    position: absolute;
+                    top: calc(50% - 1rem);
+                    left: calc(50% - 1rem);
+                    z-index: 5;
+                }
+            </style>
+        {% endblock %}
+        <!--
+            <script
+                src="https://maps.googleapis.com/maps/api/js?key=596826342838-cinfi270njavvu9sc16d19fri99cui1k.apps.googleusercontent.com&libraries=maps"
+                defer
+            ></script>
+        -->
+        {% block javascripts %}
+            {{ encore_entry_script_tags('app') }}
+            {# {{ vite_asset('main.jsx', ['react']) }} -- Le '[]' dans le cas où on a du code à injecté selon le template #}
+        {% endblock %}
+
+        {# {% if app.environment == 'dev' %} -- Si on utilise pas le 'vite_asset'
+            <script type="module" src="http://localhost:5173/assets/@vite/client"></script> -- 'assets' à cause du chemin de base qu'on a mis
+            <script type="module" src="http://localhost:5173/assets/main.js" defer></script>
+        {% endif %} #}
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-md navbar-light bg-primary mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ path('home') }}">Symfony</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#index"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="index">
+                    <ul class="navbar-nav me-auto mb-lg-0">
+                        <li class="nav-item">
+                            <a href="{{ path('product') }}"
+                                class="nav-link {{ app.current_route == 'product' ? 'active' : '' }}">Produits</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('property.index') }}" class="nav-link {{ app.current_route starts with 'property.' ? 'active' : '' }}">Biens</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('post') }}"
+                                class="nav-link {{ app.current_route == 'post' ? 'active' : '' }}">Workflow</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('api.folder') }}"
+                                class="nav-link {{ app.current_route == 'api.folder' ? 'active' : '' }}">Filemanager</a>
+                        </li>
+                        {% if app.user %}
+                        <li class="nav-item">
+                            <a href="{{ path('profile.index') }}" class="nav-link {{ app.current_route == 'profile.index' ? 'active' : '' }}">Profil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('message') }}"
+                                class="nav-link {{ app.current_route == 'message' ? 'active' : '' }}">Messagerie</a>
+                        </li>
+                        <li class="nav-item"> {# if app.request.get('_route') in ['products_list', 'products_detail'] %}active{% endif #}
+                            <a href="{{ path('contact') }}"
+                                class="nav-link {{ app.current_route == 'contact' ? 'active' : '' }}">Contact</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('app_logout') }}"
+                                class="nav-link {{ app.current_route == 'app_logout' ? 'active' : '' }}">Déconnexion</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a href="{{ path('app_login') }}"
+                                class="nav-link {{ app.current_route == 'app_login' ? 'active' : '' }}">Se connecter</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ path('app_register') }}"
+                                class="nav-link {{ app.current_route == 'app_register' ? 'active' : '' }}">S'inscrire</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!--
+            <div id="root">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis rem officiis, sit repellendus, quas eveniet ea, labore odio eligendi placeat tempore cum aperiam ratione dolore alias ad quibusdam eos provident.
+            </div>
+        -->
+        {% include 'partials/flash.html.twig' with {'active': 'home'} %} {# with {} only -- Ne recevra que la variable et n’aura pas accès aux autres variables du contexte #}
+        {% block body %}{% endblock %}
+    </body>
+</html>

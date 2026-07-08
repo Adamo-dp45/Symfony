@@ -1,0 +1,16 @@
+controllers:
+    prefix: "{_locale}"
+    requirements:
+        _locale : en|fr|de
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+api_refresh_token: # jwt refreshBundle
+    path: /fr/api/token/refresh
+    methods: [POST]
+
+api_token_invalidate: # !!
+    path: /fr/api/token/invalidate
+    methods: [POST]

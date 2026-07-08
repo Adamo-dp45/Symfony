@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Page non trouvée{% endblock %}
+
+{% block body %}
+    <h1>404 – Page introuvable</h1>
+    <p>Désolé, la page que vous demandez n’existe pas.</p>
+    <a href="{{ path('home') }}">Revenir à l’accueil</a>
+    <p>Code : {{ status_code }}, message : {{ status_text }}</p>
+{% endblock %}

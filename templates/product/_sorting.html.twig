@@ -1,0 +1,11 @@
+{{ knp_pagination_sortable(products, 'Prix', 'p.price') }}
+{#
+    {% if products.isSorted('p.title') or products.isSorted('p.id') %}
+        {% if products.direction == 'asc' %}
+            ↑
+        {% else %}
+            ↓
+        {% endif %}
+    {% endif %}
+#}
+{{ knp_pagination_sortable(products, 'Promo', 'p.promo') }}

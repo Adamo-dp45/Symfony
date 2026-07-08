@@ -1,0 +1,9 @@
+api_platform:
+    resource: .
+    type: api_platform
+    prefix: /fr/api
+    stateless: false # Permet d'éviter l'erreur 'Session was used while the request was declared stateless' et l'usage normal de la session
+
+# api_graphql_entrypoint: -- Pour définir la route du graphql
+#    path: /api/graphql
+#    controller: api_platform.graphql.action.entrypoint

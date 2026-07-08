@@ -1,0 +1,201 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tous nos biens | Symfony{% endblock %}
+
+{% block body %}
+<style>
+    /*
+        @media only screen and (min-width: 1100px) {
+            .map {
+                position: sticky;
+                top: 0;
+                left: 0;
+                height: 100vh;
+            }
+        }
+        .map {
+            background-color: #CCC;
+        }
+
+        -- Marker google maps personnalisé
+        .marker {
+            transform: translate(-50%, calc(-100%, 10px));
+            white-space: nowrap;
+            font-size: 16px;
+            padding: 5px 10px;
+            font-weight: bold;
+            text-align: center;
+            background-color: #FFF;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .marker::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            margin-left: -8px;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #FFF;
+        }
+
+        .marker.is-active {
+            background-color: #5069FF;
+            color: #FFF;
+            z-index: 300;
+        }
+
+        .marker.is-active::after {
+            border-top-color: #5069FF;
+        }
+    */
+
+    .marker.leaflet-popup {
+        margin-bottom: 16px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 5px 10px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .3);
+        background-color: #FFFFFF;
+    }
+
+    .marker .leaflet-popup-content-wrapper  {
+        background: transparent;
+        color: inherit;
+        box-shadow: none;
+        text-align: inherit;
+    }
+
+    .marker.leaflet-popup::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        margin-left: -8px;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid #FFFFFF;
+    }
+
+    .marker .leaflet-popup-content {
+        text-align: inherit;
+        color: inherit;
+        margin: 0;
+    }
+
+    .marker .leaflet-popup-tip-container { /* La flèche en bas */
+        display: none;
+    }
+
+    .marker.is-active, .marker:hover {
+        z-index: 300;
+        background-color: #5069ff;
+        color: #FFFFFF;
+    }
+
+    .marker.is-active::after, .marker:hover::after {
+        border-top-color: #5069ff;
+    }
+
+    .marker.is-expanded {
+        background-color: #FFFFFF!important;
+        color: inherit!important;
+        z-index: 301;
+        text-align: left;
+    }
+
+    .marker.is-expanded::after {
+        border-top-color: #FFFFFF!important;
+    }
+
+    @media only screen and (min-width: 1100px) {
+        .map {
+            position: sticky;
+            top: 0;
+            left: 0;
+            height: 100vh;
+        }
+    }
+</style>
+
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for crumb in breadcrumbs %}
+                {% if crumb.url %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ crumb.url }}">{{ crumb.label }}</a>
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {{ crumb.label }}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+</div>
+
+<div class="p-4 text-center">
+    <div class="container">
+        {{ form_start(form) }}
+        <div class="row">
+            <div class="col">{{ form_row(form.maxPrice) }}</div>
+            <div class="col">{{ form_row(form.minSurface) }}</div>
+            <div class="col">{{ form_row(form.options, {attr: {class: 'select'} }) }}</div>
+            {#
+            <div class="col">
+                <div class="form-group">
+                   <!-- <input type="text" class="form-control" placeholder="Adresse" name="" id="search_address"> -->
+                   <div id="autocomplete"></div>
+                </div>
+            </div>
+            #}
+            <div class="col">{{ form_row(form.address, {attr: {class: 'search_address'} }) }}</div>
+            <div class="col">{{ form_row(form.distance) }}</div>
+            <div class="col">
+                <button class="btn btn-primary">Rechercher</button>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<div class="container">
+    <h1 class="display-6 mb-4">Tous nos biens</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row mb-3">
+            {# {% cache 'property' ttl(3600) %} #}
+                {% for propertie in property %}
+                    <div class="col-4 mb-3 js-marker" data-lat="{{ propertie.latitude }}" data-lng="{{ propertie.longitude }}" data-price="{{ propertie.price }}" data-title="{{ propertie.title }}">
+                        <div class="card">
+                            {% if propertie.picture %}
+                                <img src="{{ vich_uploader_asset(propertie.picture, 'imageFile') | imagine_filter('thumb') }}" class="card-img-top" style="width: 100%; height: auto;" alt="">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title"><a href="{{ path('property.show', {id: propertie.id, slug: propertie.slug}) }}">{{ propertie.title }}</a></h5>
+                                <p class="card-text">
+                                    {{ propertie.city }} ({{ propertie.postalCode }})
+                                </p>
+                                <div class="text-primary" style="font-weight: bold; font-size: 2rem">{{ propertie.price | number_format(0, '', ' ') }} FCFA</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {# {% endcache %} #}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="map" id="map"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}

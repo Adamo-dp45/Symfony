@@ -1,0 +1,10 @@
+knpu_oauth2_client:
+    clients:
+        # configure your clients as described here: https://github.com/knpuniversity/oauth2-client-bundle#configuration
+        github: # Une clé pour identifier nos clients
+            type: github # Correspond au type de client qu'on a installer
+            client_id: '%env(GITHUB_ID)%' # Id du client, correspond a ce qu'on a mis dans la variable d'env
+            client_secret: '%env(GITHUB_SECRET)%'
+            redirect_route: oauth_check # La route sur laquel on vas rediriger l'utilisateur lorsqu'il vas accepter les permissions, correspond à la route qu'on a configurer dans notre app sur github
+            redirect_params: # Si on utilise une route qui vas prendre des paramètres
+                service: github

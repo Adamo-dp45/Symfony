@@ -1,0 +1,10 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title 'Editer la categorie ' ~ category.name ~ ' | Symfony' %}
+
+{% block body %}
+<div class="container">
+    <h1>Editer une categorie {{ category.name }}</h1>
+    {{ form(form) }}
+</div>
+{% endblock %}

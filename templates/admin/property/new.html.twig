@@ -1,0 +1,10 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Créer un nouveau biens | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Créer un bien</h1>
+    {{ include('admin/property/_form.html.twig', {button: 'Creér'}) }}
+</div>
+{% endblock %}

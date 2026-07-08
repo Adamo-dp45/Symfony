@@ -1,0 +1,10 @@
+twig:
+    file_name_pattern: '*.twig'
+    # form_themes: ['bootstrap_5_layout.html.twig']
+    form_themes: ['forms/layout.html.twig', 'forms/form.html.twig'] # Pour personaliser les formulaires
+    # globals:
+    #    ApiKey: '%env(DEMO)%'
+
+when@test:
+    twig:
+        strict_variables: true

@@ -1,0 +1,128 @@
+security:
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    providers: # Permet d'expliquer comment recupérer des utilisateurs
+        # used to reload user from session & other features (e.g. switch_user)
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: username
+
+        # Api me
+        api_user_provider:
+            entity:
+                class: App\Entity\User
+                property: apiToken
+
+        # ApiPlatform me Apikey
+        apikey_user_provider:
+            entity:
+                class: App\Entity\User
+                property: apiToken
+
+        jwt: # Un provider jwt qui évite à symfony de faire appelle à la base de données
+            lexik_jwt:
+                class: App\Entity\User
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # Api me
+        apime:
+            pattern: ^/fr/api/me # S'active seulement si l'url commence par
+            provider: api_user_provider
+            custom_authenticator: App\Security\APIAuthenticator
+            lazy: true # Pour n'utiliser ce système que lorsqu'on a besoin de l'utilisateur
+            stateless: true # Si l'utilisateur est bien authentifié on ne vas pas le sauvagarder en session
+
+        # jwt --
+        login: # Sinon si on utilise un 'provider' différent pour le 'login' que pour la partie 'api' ça peut causer problèmes
+            pattern: ^/fr/api/login
+            provider: app_user_provider # Pour récupérer les informations en base de données
+            stateless: true # Vu qu'on n'est en jwt et qu'on n'utilise pas les cookies
+            json_login:
+                check_path: api_login # Le chemin à utiliser pour valider les authentifications
+                username_path: username # Les identifiants attendu ou dans 'lexik_jwt_authentication.yaml'
+                password_path: password # --
+                success_handler: lexik_jwt_authentication.handler.authentication_success # La class à utilisé lorsque l'authentification est ok
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            # L'ordre est important
+
+        api:
+            pattern: ^/fr/api # Ou '^/(fr/)?api/'
+            # Si on a une erreur 'JWT Token Not Found' alors il faut mettre 'anonymous' à 'true' mais il l'est par défaut
+            stateless: true
+            entry_point: jwt
+            provider: app_user_provider # Pour indiquer celui qu'il doit utiliser
+            jwt: ~ # Un provider qui permet de récupérer l'utilisateur depuis le 'token jwt' au lieu de faire une requête en base de données
+
+            refresh_jwt: # 'jwtRefreshBundle' et pour la route on a aussi 'api_refresh_token'
+                check_path: /fr/api/token/refresh
+            logout:
+                path: /fr/api/token/invalidate
+                # success_handler: -- Pour customiser la réponse
+        # --
+
+        main:
+            lazy: true # Ne vas pas se chargé par défaut tant qu'on accède pas à l'utilisateur
+            provider: app_user_provider # Si on utilise l'authentification par 'Apikey' on a 'apikey_user_provider'
+            # custom_authenticator: App\Security\AppAuthenticator # !! on a 'APIKeyAuthenticator'
+            custom_authenticator: # Si on a plusieurs authenticators
+                - App\Security\AppAuthenticator
+                - App\Security\GithubAuthenticator
+                - App\Security\StupidAuthenticator
+            entry_point: App\Security\AppAuthenticator # Pour définir le composant qui est responsable de l'entry_point, quand on a plusieurs authenticators
+            user_checker: App\Security\NoJohnUserChecker # Pour avoir des checker qui vont être utiliser pour valider les utilisateurs
+            access_denied_handler: App\Security\AccessDeniedHandler # Pour captuer les 'Access denied'
+            logout:
+                path: app_logout
+                # where to redirect after logout
+                target: app_login # Permet d'indiquer la route de redirection
+
+            # Authentification via 'json'
+            json_login: # 
+                check_path: login_json # La route dans 'SecurityController'
+
+            # -- Le 'RateLimiter' pour l'authentification par forçe brute
+            # login_throttling:
+            #    max_attempts: 3 -- Le nombre de tentative par minute, 5 par défaut
+            #    interval: '15 minutes' -- L'interval en 'seconds', 'hours' ou 'day'
+            #    limiter: app.login_rate_limiter -- Use a custom rate limiter via its service ID
+
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /
+                # by default, the feature is enabled by checking a checkbox in the
+                # login form, uncomment the following line to always enable it.
+                #always_remember_me: true
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#the-firewall
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/fr/api/(login|token/refresh), roles: PUBLIC_ACCESS } # Pour le 'jwtRefreshBundle' et on doit y accéder même si on n'est pas connecté, ou '/[a-z]{2}' au lieu de '/fr' pour être générique
+
+when@test:
+    security:
+        password_hashers:
+            # By default, password hashers are resource intensive and take time. This is
+            # important to generate secure password hashes. In tests however, secure hashes
+            # are not important, waste resources and increase test times. The following
+            # reduces the work factor to the lowest possible values.
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon

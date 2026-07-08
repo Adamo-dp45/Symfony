@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Messagerie | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="display-6">Messagerie privée</h1>
+    <p class="lead">Résumé de la messagerie</p>
+    <p>
+        Reçu : {{ app.user.received|length }}
+    </p>
+    <p>
+        Envoyés : {{ app.user.messages|length }}
+    </p>
+    <a class="btn btn-primary" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+        Link with href
+    </a>
+    <a href="{{ path('message.send') }}" class="btn btn-primary">Envoyer un message</a>
+</div>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Mes dossiers</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="list-group">
+            <a href="{{ path('message') }}" class="list-group-item list-group-item-action active">Acceuil</a>
+        </div>
+        <div class="list-group">
+            <a href="{{ path('message.recieved') }}" class="list-group-item list-group-item-action">Boîte de reception</a>
+        </div>
+        <div class="list-group">
+            <a href="{{ path('message.sent') }}" class="list-group-item list-group-item-action">Elément envoyés</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

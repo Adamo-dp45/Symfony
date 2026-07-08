@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="display-5">Résultats pour "<span class="text-primary">{{ query ? query : ''}}</span>"</h1>
+
+    <h2 class="lead">Articles</h2>
+    <ul>
+        {% for c in category %}
+            <li>{{ c.name }}</li>
+        {% else %}
+            <li>Aucun article trouvé</li>
+        {% endfor %}
+    </ul>
+
+    <h2 class="lead">Utilisateurs</h2>
+    <ul>
+        {% for user in users %}
+            <li>{{ user.username }}</li>
+        {% else %}
+            <li>Aucun utilisateur trouvé</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    app.gotenberg_endpont: '%env(GOTENBERG_ENDPOINT)%'
+    glide_key: '%env(resolve:default::GLIDE_KEY)%' # resolve:default:demo: - Pour mettre une valeur par défaut
+    avatars.directory: '%kernel.project_dir%/public/uploads/avatars'
+    recaptcha_key: '%env(RECAPTCHA3_KEY)%'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/' # Par défaut chercher les dans le dossier src
+        # exclude: '../src/{Entity,Kernel.php}' -- Pour exclure certains fichiers
+
+    # App\Controller\: -- En cas de déplacement du Controller
+    #    resource: '../src/Controller/'
+    #    tags: ['controller.service_arguments']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    # OpenApi
+    App\ApiPlateform\OpenApi\OpenApiFactory:
+        decorates: 'api_platform.openapi.factory' # On décore la class OpenApiFactory
+        arguments: ['@App\ApiPlateform\OpenApi\OpenApiFactory.inner']
+        autoconfigure: false
+    # Maintenant on va utiliser mon OpenApiFactory lorsque les spécifications OpenApi vont être générer
+
+    App\EventListener\DesarializeListener: # On décore le deserialize de 'ApiPlatform' qui est utiliser lors de la désérialisation
+        tags:
+            - { name: 'kernel.event_listener', event: kernel.request, methode: 'onKernelRequest', priority: 2 }
+        decorates: 'api_platform.listener.request.deserialize'
+        autoconfigure: false
+
+    # App\Serializer\PostContextBuilder:
+    #    decorates: 'api_platform.serializer.context_builder'
+    #    autoconfigure: false -- Pour ne pas qu'il vienne s'injecter dans la liste des services en fonction de son interface
+    #   Ou ..
+    App\Serializer\PostAPINormalizer:
+        autowire: true
+        arguments:
+            $normalizer: '@serializer.normalizer.object'
+        tags:
+            - { name: 'serializer.normalizer', priority: 100 }
+
+    App\Serializer\UserOwnedDenormalizer:
+        autowire: true
+        arguments:
+            $denormalizer: '@serializer.normalizer.object'
+            # $security: '@security.helper' -- Pour injecter sécurity
+        tags:
+            - { name: 'serializer.denormalizer', priority: 100 }
+
+    # App\ApiPlateform\Graphql\PostResolver:
+    #    tags:
+    #        - { name: api_platform.graphql.query_resolver }
+
+    App\EventListener\PropertyListener:
+        tags:
+            - { name: doctrine.event_listener, event: preRemove }
+
+    # App\Helper\Paginator\PaginatorInterface: -- Interface
+    #     class: App\Helper\Paginator
+    #     arguments:
+    #         $secret: '%env(KEY)%' -- Passer un argument ou ['%twitter_key%', '%twitter_secret%'] du parameters
+
+    # App\Service\MyService: -- Injection via méthode publique
+    # calls:
+    #    - method: configureMailer
+    #    arguments: ['@mailer']
+
+    App\Domain\Application\Service\TwilioService:
+        arguments:
+            $sid: '%env(TWILIO_ACCOUNT_SID)%'
+            $token: '%env(TWILIO_AUTH_TOKEN)%'
+            $from: '%env(TWILIO_PHONE_NUMBER)%'
+
+    App\EventListener\ImageResizeListener:
+        tags:
+            - { name: kernel.event_listener, event: vich_uploader.post_upload, method: onUpload }
+
+    App\Repository\FailedJobRepository:
+        arguments: ['@messenger.transport.failed'] # Permet d'injecter le doctrine transport
+
+    App\EventSubscriber\ImageCacheSubscriber:
+        tags:
+            - { name: doctrine.event_subscriber }
+
+    App\Domain\Twig\ViteAssetExtension:
+        arguments:
+            $isDev: '%env(VITE_DEV)%'
+            $manifest: '%kernel.project_dir%/public/assets/.vite/manifest.json'
+            $cache: '@vite_cache_pool'
+
+    App\Domain\Helper\MercureCookieGenerator:
+        arguments:
+            $secret: '%env(MERCURE_JWT_SECRET)%'
+
+    # App\Demo: -- Va charger la class de même nom par défaut
+    #    class: App\Demo -- Donc on n'est pas obligé de faire ça
+
+    App\Repository\DependencyRepository:
+        arguments: ['%kernel.project_dir%']
+            #$rootPath: 

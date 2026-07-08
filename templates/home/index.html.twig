@@ -1,0 +1,147 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil | Symfony{% endblock %}
+
+{% block javascripts %}
+<script>
+    const url = new URL('http://localhost:3000/.well-known/mercure') // L'url vers le hub
+    url.searchParams.append('topic', 'http://monsite.com/ping') // Les topic qu'on vas écoutés, peut être  simplement une url en dur mais on vas pouvoir utiliser un sytème de templates avec un params {id} qui permettra d'écouter plusieurs urls
+    url.searchParams.append('topic', 'http://monsite.com/user/{id}') // --
+
+    const eventSource = new EventSource(url, {
+        withCredentials: true, // 'withCredentials' pour la partie permet d'envoyer les cookies
+
+        /* headers: { -- Pour les spa et mobiles
+            Authorization: 'Jwt mercure'
+        } */
+    })
+    eventSource.onmessage = (e) => { // On écoute lorsqu'on reçoit un message
+        console.log(
+            e.data // Pour récupérer les données de l'évènement
+        )
+        let message = 'Ping !'
+        // -- Pour la partie user
+        const data = JSON.parse(e.data)
+        if(data.username) {
+            message = `Ping par ${data.username} !`
+        }
+     
+        // --
+        document.querySelector('.ping').insertAdjacentHTML('afterend', `<div class="alert alert-success">${message}</div>`)
+        window.setTimeout(() => {
+            const $alert = document.querySelector('.alert')
+            $alert.parentNode.removeChild($alert)
+        }, 2000)
+    }
+</script>
+{% endblock %}
+
+
+{% block body %}
+<div class="bg-light p-5 mb-5 text-center">
+    <div class="container">
+        <h1 class="display-4">Symfony</h1>
+    </div>
+</div>
+
+<a href="" data-intro='Hello step one!'>Intro</a>
+
+{#
+    - Les fonctions
+        - url() un lien absolue
+
+    - Les filtres
+        - value | raw : Permet d'affichier le html dans twig 
+        - table | sum : !! de faire la somme d'un tableau, params 'sum(attribute='price')'
+        - value | default('') : Pour donner une valeur par défaut
+        - array | join(', ') : !! joindre des données
+        - value | nl2br : !! faire un saut de ligne
+
+    - Les blocs
+        - {% apply striptags %}{% block title '' %}{% endapply %} : Pour le 'strip_tags()'
+        - {% set total = 10 + 5 %} : !! définir une variable
+        - {% block javascripts %}{{ parent() }}{% endblock %} : !! appeler le bloc parent
+
+    - Le cache twig
+        - cache 'user_profile_' ~ app.user.id ~ '_panel' ttl(1800) : Une clé de cache dynamique, 'ttl' le temps d'expiration
+        - cache 'post' ~ post.id post.updatedAt.timestamp : Une clé de cache dynamique par propriété
+#}
+<div class="container">
+    <p>
+        <a href="{{ path('admin') }}">Aller l'Administration</a> <br>
+        <a href="{{ path('ux') }}">UX</a> <br>
+        <a href="{{ path('pdf') }}" data-turbo="false">PDF</a> <br>
+        <a href="{{ path('easyadmin') }}" data-turbo="false">Easy Admin</a> <br>
+        <a href="/fr/api" data-turbo="false">ApiPlatform</a> <br>
+        <a href="/fr/api/graphql" data-turbo="false">Graphql</a>
+    </p>
+
+    <h1 class="display-6">Packages</h1>
+    <p>
+        <a href="{{ path('intervention') }}">Intervention image</a>
+    </p>
+
+    {# if app.user and (review.author == app.user or is_granted('ROLE_ADMIN')) #}
+    {# for comment in comments if comment.isVisible() -- Boucle si la condition est correct #}
+    <p class="lead">{{ value }}</p>
+    {# {% import "partials/macro.html.twig" as form %}
+        On importe le macro dans une variable
+    #}
+    {# {{ form.input('name', 'Nom', 'col') }} - {class: 'col'} #}
+    <button class="confetti btn btn-secondary mb-3">Confetti</button>
+
+    {# {% ca post %}
+        <div>
+            My cache
+        </div>
+    {% endca %} #}
+
+    {# -- Mercure -- #}
+    <form action="{{ path('ping') }}" method="post" class="ping mb-3"> {# Pour pingé tous le monde #}
+        <button class="btn btn-primary">Ping !</button>
+    </form>
+    <ul class="list-group">
+        {% for user in users %}
+        <li class="list-group-item mb-2 {{ app.user == user ? 'active' : '' }}">
+            <span class="mb-2">{{ user.username }} - #({{ user.id }})</span>
+            <form action="{{ path('ping', {user: user.id}) }}" method="post" style="display: inline-block;"> {# Pour pingé un utilisateur seulement #}
+                <button class="btn btn-primary">Ping user !</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {# -- #}
+
+    <p>
+        {% trans %}Welcome{% endtrans %} <br>
+        {{ 'WelcomeFiltre' | trans }} <br>
+        {{ 'WelcomeAvance' | trans({name: 'John'}) }}
+    </p>
+
+    <div id="react"></div>
+    <div id="vue" class="mb-3"></div>
+
+    {{ form_start(form) }}
+    <div class="row">
+        <div class="col">{{ form_row(form.query) }}</div>
+        <div class="col">{{ form_row(form.page) }}</div>
+        <div class="col">{{ form_row(form.limit) }}</div>
+        <div class="col">{{ form_row(form.sortBy) }}</div>
+        <div class="col">{{ form_row(form.order) }}</div>
+    </div>
+    <button class="btn btn-primary mb-3">Filtrer</button>
+    {{ form_end(form) }}
+    {{ dump(results) }}
+
+    <h1 class="display-6">Recherche global</h1>
+    <form id="search-form" action="{{ path('api.search') }}" method="get" class="mb-3">
+        <input type="text" id="search-input" name="q" class="form-control mb-3" placeholder="Rechercher...">
+        <button type="submit" class="btn btn-primary mb-3">Rechercher</button>
+    </form>
+    <div id="search-results" class="mb-3"></div>
+
+    <div class="mb-5">
+        <posts-comments data-post="1" data-user="{{ app.user ? app.user.id : 0 }}"></posts-comments>
+    </div>
+</div>
+{% endblock %}

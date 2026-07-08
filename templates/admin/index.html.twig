@@ -1,0 +1,54 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="display-6 mb-4">Administration</h1>
+
+    <h2 class="display-6">Tâches échouées</h2>
+    <ul>
+        {% for job in jobs %}
+        <li>
+            <h2>{{ job.title }}</h2>
+            <pre>
+                {# job.trace #}
+            </pre>
+            <form action="{{ path('delete', {id: job.id}) }}" method="post" class="mb-2">
+                <input type="hidden" name="_method" value="DELETE">
+                <button type="submit" class="btn btn-danger">Supprimer</button>
+            </form>
+            <form action="{{ path('retry', {id: job.id}) }}" method="post">
+                <button type="submit" class="btn btn-secondary">Relancer</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <p>
+        <a href="{{ path('admin.category.corbeille') }}">Corbeille</a>
+    </p>
+
+    <div class="lead">Historique de connexion</div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Date</th>
+                <th>Adresse IP</th>
+                <th>Localisation</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for login in logins %}
+                <tr>
+                    <td>{{ login.user.email }}</td>
+                    <td>{{ login.loginAt|date('d/m/Y H:i:s') }}</td>
+                    <td>{{ login.ipAddress }}</td>
+                    <td>{{ login.location ?? 'Inconnu' }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

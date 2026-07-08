@@ -1,0 +1,26 @@
+{% for type, messages in app.flashes %}
+    {#
+        <div class="alert alert-{{ type }}">
+            {{ messages | join('. ') }}
+        </div>
+    #}
+    <div class="container my-3">
+        <div class="alert alert-{{ type }} alert-dismissible text-{{ type }} text-center lead fade show" role="alert">
+            <strong>{{ messages | join('. ') }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+{% endfor %}
+
+{#
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+#}
+
+{% if app.user and app.user.isVerified == false %}
+    <div class="alert alert-warning alert-dismissible text-warning text-center lead fade show" role="alert">
+        <strong>Votre compte n'est pas activé</strong>, <a href="">renvoyer le lien de confirmation</a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endif %}

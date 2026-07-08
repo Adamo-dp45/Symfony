@@ -1,0 +1,18 @@
+<div class="card" id="product-{{ product.id }}">
+    <img src="https://picsum.photos/id/{{ product.id }}/800/500" class="card-img-top" alt="">
+    <div class="card-body">
+        <h5 class="card-title">{{ product.name }}</h5>
+        <div class="card-title text-primary" style="font-weight: bold; font-size: 1.5rem">
+            {{ product.price | number_format(0, ',', ' ') }} $
+            {% if product.promo %}
+                <div class="text text-warning">Promo !</div>
+            {% endif %}
+        </div>
+        <p class="text text-muted">{{ product.description }}</p>
+        <div>
+            {% for c in product.categories %}
+                <em class="text-muted text-primary text-italic"># {{ c.name }}</em>
+            {% endfor %}
+        </div>
+    </div>
+</div>

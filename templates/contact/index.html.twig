@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nous contactez | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    {{ form_start(form) }}
+    <div class="row">
+        <div class="col-sm">{{ form_row(form.name) }}</div>
+        <div class="col-sm">{{ form_row(form.email) }}</div>
+    </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

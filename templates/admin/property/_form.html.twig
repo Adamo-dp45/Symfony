@@ -1,0 +1,54 @@
+{# Prémière manière de faire les choses, mais si on soumais un formulaire ça va reset l'autre donc on vas le faire en ajax
+    {% for picture in property.pictures %}
+    <div class="row flex">
+        <div class="col" style="width: 100px; flex: none; margin: 5px;">
+            <img src="{{ vich_uploader_asset(picture, 'imageFile') }}" width="100" alt="">
+            <form method="post" action="{{ path('admin.picture.delete', {id: picture.id}) }}">
+                <input type="hidden" name="_method" value="DELETE" style="display: inline-block;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ picture.id) }}">
+                <button class="btn btn-danger">Supprimer</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+#}
+
+{{ form_start(form) }}
+<div class="row">
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-4">{{ form_row(form.title) }}</div>
+            <div class="col-md-4">{{ form_row(form.surface) }}</div>
+            <div class="col-md-4">{{ form_row(form.price) }}</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="row">
+            {% for picture in property.pictures %}
+            <div class="col-md-4">
+                <div class="col" style="width: 100px; flex: none; margin: 5px;">
+                    <img src="{{ vich_uploader_asset(picture, 'imageFile') }}" width="100" alt="">
+                    <a href="{{ path('admin.picture.delete', {id: picture.id}) }}" class="btn btn-danger" data-delete data-token="{{ csrf_token('delete' ~ picture.id) }}">Supprimer</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-2">{{ form_row(form.rooms) }}</div>
+    <div class="col-md-2">{{ form_row(form.bedrooms) }}</div>
+    <div class="col-md-2">{{ form_row(form.heat) }}</div>
+    <div class="col-md-2">{{ form_row(form.floor) }}</div>
+</div>
+<div class="row">
+    {# <div class="col-md-2">{{ form_row(form.imageFile) }}</div> #}
+    <div class="col-md-2">{{ form_row(form.pictureFiles) }}</div>
+    <div class="col-md-3">{{ form_row(form.address, {attr: {class: 'pka-input'} }) }}</div>
+    <div class="col-md-2">{{ form_row(form.city) }}</div>
+    <div class="col-md-1">{{ form_row(form.postal_code) }}</div>
+    <div class="col-md-2">{{ form_row(form.sold) }}</div>
+</div>
+{{ form_widget(form) }}
+<button class="btn btn-primary">{{ button|default('Enregistrer') }}</button>
+{{ form_end(form) }}

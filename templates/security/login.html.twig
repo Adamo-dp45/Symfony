@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion | Symfony{% endblock %}
+
+{% block body %}
+<style>
+    .hidden {
+        display: none;
+    }
+</style>
+
+<div class="container">
+    <form method="post">
+        {% if error %}
+            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
+
+        {% if app.user %}
+            <div class="mb-3">
+                You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+            </div>
+        {% endif %}
+
+        {% if is_granted('ROLE_USER') %}
+            <div>
+                Je suis un utilisateur
+            </div>
+        {% endif %}
+
+        <h1 class="h3 mb-3 font-weight-normal">Connexion</h1>
+        <label for="inputUsername" class="mb-2">Username</label>
+        <input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control mb-3" autocomplete="username" required autofocus>
+        <label for="inputPassword" class="mb-2">Password</label>
+        <input type="password" name="password" id="inputPassword" class="form-control mb-3" autocomplete="current-password" required>
+        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+
+        <div class="checkbox mb-3">
+            <label>
+                <input type="checkbox" name="_remember_me"> Se souvenir de moi
+            </label>
+        </div>
+        <div class="mb-3">
+            <a href="{{ path('forgot') }}">Mot de passe oublié !</a>
+        </div>
+        <button class="btn btn-lg btn-primary mb-3" type="submit">
+            <span class="js-btn-text">Se connecter</span>
+            <span class="js-btn-spinner hidden">Chargement...</span>
+        </button>
+
+        <p>
+            <a href="{{ path('github_connect') }}">Se connecter via github</a>
+        </p>
+    </form>
+</div>
+{% endblock %}

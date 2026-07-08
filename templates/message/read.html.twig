@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Message | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="display-6">Messagerie</h1>
+    <h2>{{ message.subjet }}</h2>
+    <p>
+        {{ message.sender.email }}
+    </p>
+    <p>
+        {{ message.createdAt|date("m/d/Y") }}
+    </p>
+    <div>
+        {{ message.message }}
+    </div>
+    <a href="">Retour à la boite de reception</a>
+</div>
+{% endblock %}

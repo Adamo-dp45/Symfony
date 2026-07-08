@@ -1,0 +1,64 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Admin - Recettes | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div id="flash"></div>
+    <div>
+        <p>
+            <a href="{{ path('admin.recipe.create') }}" class="btn btn-primary">Créer une nouvel recette</a>
+        </p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{{ knp_pagination_sortable(recipes, 'ID', 'r.id') }}</th>
+                    <th>{{ knp_pagination_sortable(recipes, 'Titre', 'r.title') }}</th>
+                    <th>Categorie</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for recipe in recipes %}
+                <tr id="row_recipe_{{ recipe.id }}">
+                    <td>{{ recipe.id }}</td>
+                    <td>
+                        <turbo-frame id="recipe_{{ recipe.id }}"> {#
+                                - Va charger la page suivante et voir si on a un 'id' qui correspond
+                            #}
+                            <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}">{{ recipe.title }}</a>
+                        </turbo-frame>
+                    </td>
+                    <td>{{ recipe.category.name | default('') }}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{{ path('admin.recipe.edit', {id: recipe.id}) }}" class="btn btn-primary btn-sm">Editer</a>
+                            <form action="{{ path('admin.recipe.delete', {id: recipe.id}) }}" method="post">  
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {{ knp_pagination_render(recipes) }}
+
+        {# Paginator doctrine
+        <div class="d-flex">
+            {% if page > 1 %}
+                <a href="{{ path('admin.recipe.index', {page: page - 1}) }}" class="btn btn-primary">Précédent</a>
+            {% endif %}
+            {% for p in 1..maxPage %}
+                <a class="{{ page == p ? 'active' : '' }}" href="{{ path('admin.recipe.index', {page: p}) }}">{{ p }}</a>
+            {% endfor %}
+            {% if page < maxPage %}
+                <a href="{{ path('admin.recipe.index', {page: page + 1}) }}" class="btn btn-primary">Suivant</a>
+            {% endif %}
+        </div>
+        #}
+    </div>
+</div>
+{% endblock %}

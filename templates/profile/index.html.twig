@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil | Symfony{% endblock %}
+
+{% block body %}
+<div class="container">
+    {% if app.user.avatar %}
+        <img src="{{ asset('uploads/avatars/' ~ app.user.avatar) }}" alt="Avatar" width="100">
+    {% else %}
+        <img src="{{ asset('images/ui.jpg') }}" alt="Avatar" width="100">
+    {% endif %}
+
+    <form action="{{ path('profile.avatar.delete') }}" method="post" style="margin-top: 10px;">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete_avatar') }}">
+        <button type="submit" class="btn btn-danger">Supprimer l'avatar</button>
+    </form>
+
+    <h1>Changer d'avatar</h1>
+    {{ form_start(avatar) }}
+    {{ form_end(avatar) }}
+
+    <h1>Modifier mon compte</h1>
+    {{ form_start(userEditForm) }}
+    {{ form_end(userEditForm) }}
+
+    <h1>Supprimer mon compte</h1>
+    <p>Cette action est <strong>irréversible</strong>. Veuillez confirmer avec votre mot de passe.</p>
+    {{ form_start(deleteForm) }}
+        {{ form_row(deleteForm.password) }}
+        <button class="btn btn-danger">Supprimer définitivement</button>
+    {{ form_end(deleteForm) }}
+
+    <h1>Changer mon mot de passe</h1>
+    {{ form_start(passwordForm) }}
+        {{ form_row(passwordForm.currentPassword) }}
+        {{ form_row(passwordForm.newPassword.first) }}
+        {{ form_row(passwordForm.newPassword.second) }}
+    {{ form_end(passwordForm) }}
+
+    <h1>Gérer mes préférences</h1>
+    {{ form_start(preferForm) }}
+        {{ form_widget(preferForm) }}
+    {{ form_end(preferForm) }}
+</div>
+{% endblock %}

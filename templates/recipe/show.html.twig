@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recette {{ recipe.title }}{% endblock %}
+
+{% block body %}
+<div class="container">
+    <img src="{{ path('glide', {path: recipe.thumbnail}) ~ '?w=500&h=400&fm=jpg&q=75&fit=crop' }}" alt=""> {# vich_uploader_asset(recipe, 'thumbnailFile') #}
+
+    <h1>{{ recipe.title }}</h1>
+    <p>
+        {{ recipe.content | nl2br }}
+    </p>
+    <div>
+        Show {{ slug | upper }} {{ person.firstname ~ person.lastname }} {{ html | raw }}
+    </div>
+    <p class="mb-5">
+        {{ content|markdown_to_html|raw }}
+    </p>
+    <p>
+        {{ content|striptags|u.truncate(100, '...') }} {# 
+            slice(0, 100)
+            u.truncate(100, '...')
+            striptags("<br><p>")|raw -- Si on conserver certaines balises
+        #}
+    </p>
+</div>
+{% endblock %}

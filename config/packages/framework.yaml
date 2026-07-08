@@ -1,0 +1,32 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+
+    # Note that the session will be started ONLY if you read or write from it.
+    # session: true
+
+    session: # -- Configuration
+        # ID of the service used for session storage
+        # NULL means that Symfony uses PHP default session mechanism
+        handler_id: null
+        # improves the security of the cookies used for sessions
+        cookie_secure: true # Pour que le navigateur accepte l'envoi de cookie à un domaine différent, utilise le https
+        cookie_samesite: none # Va autoriser l'envoi de cookie 'cross-domain' depuis un domaine qui a une origine différentes, 'strict' si on n'est sur le même domaine que notre front, 'lax'
+        storage_factory_id: session.storage.factory.native
+        # cookie_domain: '.monsite.com' -- Pour le partager entre sous-domaines
+
+    #esi: true
+    #fragments: true
+    http_method_override: true
+    # csrf_protection: true
+
+when@prod:
+    framework:
+        http_cache: true # Permet d'activer le cache HTTP pour la production
+        default_ttl: 3600
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file

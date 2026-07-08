@@ -1,0 +1,27 @@
+{{ form_start(form, {attr: {class: 'filter js-filter-form'} }) }}
+
+    <div class="spinner-border js-loading" role="status" aria-hidden="true" style="display: none;">
+        <span class="sr-only"></span>
+    </div>
+
+    {{ form_row(form.q) }}
+
+    <h4>Categories</h4>
+    {{ form_row(form.categories) }}
+
+    <h4>Prix</h4>
+    <div class="row">
+        <div class="col">
+            {{ form_row(form.min) }} {# id="min" #}
+        </div>
+        <div class="col">
+            {{ form_row(form.max) }} {# id="max" #}
+        </div>
+    </div>
+    <div id="price-slider" data-min="{{ min }}" data-max="{{ max }}" style="margin-bottom: 3rem;"></div>
+
+    <h4>Promotion</h4>
+    {{ form_row(form.promo) }}
+
+    <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+{{ form_end(form) }}

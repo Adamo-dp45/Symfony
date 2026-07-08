@@ -1,0 +1,7 @@
+intervention_image:
+    driver: Intervention\Image\Drivers\Gd\Driver # 'Intervention\Image\Drivers\Imagick\Driver' pour imagick
+    options: # Permet de définir des configurations par défaut
+        autoOrientation: true
+        decodeAnimation: true
+        blendingColor: 'FFFFFF'
+        strip: false
