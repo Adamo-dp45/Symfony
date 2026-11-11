@@ -7,11 +7,12 @@ doctrine:
         #server_version: '16'
 
         profiling_collect_backtrace: '%kernel.debug%'
-        use_savepoints: true
+        # use_savepoints: true -- Supprimé (DoctrineBundle 3) : DBAL 4 utilise toujours les savepoints
     orm:
-        auto_generate_proxy_classes: true
-        enable_lazy_ghost_objects: true
-        report_fields_where_declared: true
+        # -- Supprimés avec DoctrineBundle 3 (Symfony 8) :
+        # auto_generate_proxy_classes / enable_lazy_ghost_objects : les entités "proxy" sont maintenant
+        #    des "native lazy objects" de PHP 8.4, plus besoin de générer des classes Proxy
+        # report_fields_where_declared : comportement par défaut avec Doctrine ORM 3
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         identity_generation_preferences:
@@ -24,8 +25,8 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
-        controller_resolver:
-            auto_mapping: false
+        # controller_resolver: -- Supprimé : 'auto_mapping: false' est désormais le seul comportement possible
+        #    auto_mapping: false   (utiliser #[MapEntity] ou les paramètres de route {id} explicites)
 
         # -- Dql functions
         dql:
@@ -50,8 +51,7 @@ when@test:
 when@prod:
     doctrine:
         orm:
-            auto_generate_proxy_classes: false
-            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            # auto_generate_proxy_classes / proxy_dir : supprimés (native lazy objects, voir plus haut)
             query_cache_driver:
                 type: pool
                 pool: doctrine.system_cache_pool

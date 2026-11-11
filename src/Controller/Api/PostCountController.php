@@ -14,7 +14,7 @@ class PostCountController extends AbstractController {
 
     public function __invoke(Request $request): int // Pour avoir une logique de params
     {
-        $onlineQuery = $request->get('online');
+        $onlineQuery = $request->query->get('online');
         $conditions = [];
         if($onlineQuery !== null) {
             $conditions = ['online' => $onlineQuery === '1' ? true : false];

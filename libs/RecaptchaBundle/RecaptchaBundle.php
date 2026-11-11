@@ -6,7 +6,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class RecaptchaBundle extends Bundle
 {
-    public function build(\Symfony\Component\DependencyInjection\ContainerBuilder $container)
+    public function build(\Symfony\Component\DependencyInjection\ContainerBuilder $container): void
     {
         parent::build($container);
         $container->addCompilerPass(new RecaptchaComplilerPass()); // Permet de rajouter une logique qui va rajouter des comportements

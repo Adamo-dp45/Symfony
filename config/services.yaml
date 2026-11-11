@@ -1,5 +1,8 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
+# See also https://symfony.com/doc/current/service_container/import.html
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
@@ -91,9 +94,9 @@ services:
     App\Repository\FailedJobRepository:
         arguments: ['@messenger.transport.failed'] # Permet d'injecter le doctrine transport
 
-    App\EventSubscriber\ImageCacheSubscriber:
-        tags:
-            - { name: doctrine.event_subscriber }
+    # App\EventSubscriber\ImageCacheSubscriber: -- Le tag 'doctrine.event_subscriber' n'existe plus avec DoctrineBundle 3
+    #    tags:                                    on utilise l'attribut #[AsDoctrineListener] directement sur la classe
+    #        - { name: doctrine.event_subscriber }
 
     App\Domain\Twig\ViteAssetExtension:
         arguments:

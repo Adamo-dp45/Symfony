@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 class RecaptchaExtension extends Extension {
 
-    public function load(array $configs, \Symfony\Component\DependencyInjection\ContainerBuilder $container)
+    public function load(array $configs, \Symfony\Component\DependencyInjection\ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader( // Le bundle sera capable de déclarer ses propres services
             $container,

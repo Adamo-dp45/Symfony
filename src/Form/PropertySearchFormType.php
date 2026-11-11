@@ -72,7 +72,7 @@ class PropertySearchFormType extends AbstractType
      * Pour avoir des paramètres propre et changer le préfix dans l'url
      * @return string
     */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return '';
     }

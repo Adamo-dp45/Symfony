@@ -73,7 +73,7 @@ final class AdminPropertyController extends AbstractController {
     #[Route('/admin/{id}', name: 'admin.property.delete', methods: ['DELETE'], requirements: ['id' => Requirement::DIGITS])]
     public function delete(Property $property, Request $request, EntityManagerInterface $em)
     {
-        if($this->isCsrfTokenValid('delete' . $property->getId(), $request->get('_token'))) {
+        if($this->isCsrfTokenValid('delete' . $property->getId(), $request->getPayload()->getString('_token'))) {
             $em->persist($property);
             $em->flush();
             $this->addFlash('success', 'Bien supprimé avec succès');

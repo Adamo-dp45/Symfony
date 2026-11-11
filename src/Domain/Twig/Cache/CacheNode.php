@@ -19,7 +19,7 @@ class CacheNode extends Node {
      * Permet de compiler le code php qui va être mis dans notre template rendu dans twig
      * @param Compiler $compiler
      */
-    public function compile(Compiler $compiler)
+    public function compile(Compiler $compiler): void
     {
         // return parent::compile($compiler);
         /*
