@@ -17,14 +17,14 @@ final class ProductController extends AbstractController
     public function index(ProductRepository $productRepository, Request $request): Response
     {
         $data = new ProductSearch();
-        $data->page = $request->get('page', 1);
+        $data->page = $request->query->getInt('page', 1);
         $form = $this->createForm(ProductSearchFormType::class, $data);
         $form->handleRequest($request);
         [$min, $max] = $productRepository->findMinMax($data);
         $products = $productRepository->findSearch($data);
 
         // if($request->isXmlHttpRequest()) { -- Si on n'est en Ajax
-        if($request->get('ajax')) { // Pour éviter le retour json en affichage dans mon cas
+        if($request->query->get('ajax')) { // Pour éviter le retour json en affichage dans mon cas
             return new JsonResponse([
                 'content' => $this->renderView('product/_products.html.twig', ['products' => $products]),
                 'sorting' => $this->renderView('product/_sorting.html.twig', ['products' => $products]),

@@ -1,11 +1,11 @@
 {
-    "api-platform/core": {
-        "version": "4.1",
+    "api-platform/symfony": {
+        "version": "4.4",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
             "version": "4.0",
-            "ref": "cb9e6b8ceb9b62f32d41fc8ad72a25d5bd674c6d"
+            "ref": "e9952e9f393c2d048f10a78f272cd35e807d972b"
         },
         "files": [
             "./config/packages/api_platform.yaml",
@@ -71,19 +71,6 @@
         },
         "files": [
             "./config/routes/easyadmin.yaml"
-        ]
-    },
-    "excelwebzone/recaptcha-bundle": {
-        "version": "1.5",
-        "recipe": {
-            "repo": "github.com/symfony/recipes-contrib",
-            "branch": "main",
-            "version": "1.5",
-            "ref": "fd4da7bc71749db65bc83abf5d164bfa9c839cf4"
-        },
-        "files": [
-            "./config/packages/dev/ewz_recaptcha.yaml",
-            "./config/packages/ewz_recaptcha.yaml"
         ]
     },
     "gesdinet/jwt-refresh-token-bundle": {

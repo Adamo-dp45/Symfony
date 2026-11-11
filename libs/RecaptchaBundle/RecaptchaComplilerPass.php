@@ -6,7 +6,7 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 
 class RecaptchaComplilerPass implements CompilerPassInterface
 {
-    public function process(\Symfony\Component\DependencyInjection\ContainerBuilder $container)
+    public function process(\Symfony\Component\DependencyInjection\ContainerBuilder $container): void
     {
         if($container->hasParameter('twig.form.resources')) { // La condition empêche
             $resources = $container->getParameter('twig.form.resources') ?: [];

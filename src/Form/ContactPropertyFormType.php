@@ -4,10 +4,10 @@ namespace App\Form;
 
 use App\DTO\ContactPropertyDTO;
 use Damo\RecaptchaBundle\Type\RecaptchaSubmitType;
-use EWZ\Bundle\RecaptchaBundle\Form\Type\EWZRecaptchaType;
+// use EWZ\Bundle\RecaptchaBundle\Form\Type\EWZRecaptchaType; -- Bundle EWZ abandonné et retiré lors du passage à Symfony 8
 use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
 use Karser\Recaptcha3Bundle\Validator\Constraints\Recaptcha3;
-use EWZ\Bundle\RecaptchaBundle\Validator\Constraints\IsTrue as RecaptchaTrue;
+// use EWZ\Bundle\RecaptchaBundle\Validator\Constraints\IsTrue as RecaptchaTrue;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;

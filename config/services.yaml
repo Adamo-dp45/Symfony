@@ -91,9 +91,9 @@ services:
     App\Repository\FailedJobRepository:
         arguments: ['@messenger.transport.failed'] # Permet d'injecter le doctrine transport
 
-    App\EventSubscriber\ImageCacheSubscriber:
-        tags:
-            - { name: doctrine.event_subscriber }
+    # App\EventSubscriber\ImageCacheSubscriber: -- Le tag 'doctrine.event_subscriber' n'existe plus avec DoctrineBundle 3
+    #    tags:                                    on utilise l'attribut #[AsDoctrineListener] directement sur la classe
+    #        - { name: doctrine.event_subscriber }
 
     App\Domain\Twig\ViteAssetExtension:
         arguments:

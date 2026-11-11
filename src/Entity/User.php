@@ -16,7 +16,7 @@ use Scheb\TwoFactorBundle\Model\Email\TwoFactorInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
@@ -258,11 +258,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         return $data;
     }
 
-    #[\Deprecated]
-    public function eraseCredentials(): void
-    {
-        // @deprecated, to be removed when upgrading to Symfony 8
-    }
+    // eraseCredentials() a été retirée de UserInterface en Symfony 8 :
+    // on ne garde plus de mot de passe en clair dans l'entité, et __serialize() ci-dessus
+    // évite que le hash soit stocké tel quel en session.
 
     public function getEmail(): ?string
     {

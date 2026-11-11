@@ -12,7 +12,7 @@ class RecaptchaSubmitType extends AbstractType {
     {
     }
 
-    public function configureOptions(\Symfony\Component\OptionsResolver\OptionsResolver $resolver)
+    public function configureOptions(\Symfony\Component\OptionsResolver\OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'mapped' => false,
@@ -24,19 +24,19 @@ class RecaptchaSubmitType extends AbstractType {
      * Préfix du block dans notre vue fields.twig.html
      * @return string
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'recaptcha_submit';
     }
 
-    public function buildView(\Symfony\Component\Form\FormView $view, \Symfony\Component\Form\FormInterface $form, array $options)
+    public function buildView(\Symfony\Component\Form\FormView $view, \Symfony\Component\Form\FormInterface $form, array $options): void
     {
         $view->vars['label'] = false;
         $view->vars['key'] = $this->key;
         $view->vars['button'] = $options['label'];
     }
 
-    public function getParent()
+    public function getParent(): ?string
     {
         return TextType::class; // On y hérite car on veut le système de validation
     }

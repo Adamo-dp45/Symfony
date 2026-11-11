@@ -35,11 +35,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Valid;
-use Vich\UploaderBundle\Mapping\Annotation\Uploadable;
-use Vich\UploaderBundle\Mapping\Annotation\UploadableField;
+use Vich\UploaderBundle\Mapping\Attribute\Uploadable;
+use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 #[ApiResource(
@@ -139,18 +139,18 @@ use Vich\UploaderBundle\Mapping\Annotation\UploadableField;
                         ]
                     ],
                 */
-                responses: [
-                    '200' => [
-                        'description' => 'Le nombre de résultats',
-                        'content' => [
+                responses: [ // Depuis API Platform 4.2+ : un objet 'Response' (et non plus un simple tableau)
+                    '200' => new Response(
+                        description: 'Le nombre de résultats',
+                        content: new ArrayObject([
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'integer',
                                     'example' => 3
                                 ]
                             ]
-                        ]
-                    ]
+                        ])
+                    )
                 ]
             )
         ),
