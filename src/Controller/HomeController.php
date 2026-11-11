@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Domain\Application\Service\TwilioService;
 use App\Domain\Helper\MercureCookieGenerator;
+use App\Domain\Service\PdfGeneratorService;
 use App\DTO\SearchQueryDto;
 use App\Entity\User;
 use App\Form\SearchQueryType;
@@ -24,6 +25,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Mercure\HubInterface;
@@ -261,6 +263,26 @@ final class HomeController extends AbstractController
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="document.pdf"',
         ]);
+    }
+
+    #[Route('/output-pdf', name: 'pdf.bundle')]
+    public function outputPdf(PdfGeneratorService $pdfGeneratorService): Response
+    {
+        $html = $this->renderView('home/pdf.html.twig');
+        $content = $pdfGeneratorService->output($html); /*
+            - Ou.. '->getPdf()' pour ensuite lui passer les options
+        */
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            // 'Content-Disposition' => 'inline; filename="document.pdf"',
+        ]);
+    }
+
+    #[Route('/stream-pdf', name: 'pdf.bundle.stream')]
+    public function streamPdf(PdfGeneratorService $pdfGeneratorService): StreamedResponse
+    {
+        return $pdfGeneratorService->getStreamResponse($this->renderView('home/pdf.html.twig'), 'document.pdf');
     }
 
     #[Route('/ux', name: 'ux')]

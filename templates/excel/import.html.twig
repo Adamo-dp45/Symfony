@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Import{% endblock %}
+
+{% block body %}
+<div class="container">
+    {{ form_start(form, {attr: {'data-turbo': 'false'}}) }}
+        {{ form_widget(form) }}
+    {{ form_end(form) }}
+    
+    {% if data is not empty %}
+        <table class="table table-striped">
+            {% for row in data %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</div>
+{% endblock %}

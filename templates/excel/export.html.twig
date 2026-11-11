@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Export{% endblock %}
+
+{% block body %}
+<div class="container">
+    {{ form_start(form, {attr: {'data-turbo': 'false'}}) }}
+        {{ form_widget(form) }}
+    {{ form_end(form) }}
+</div>
+{% endblock %}

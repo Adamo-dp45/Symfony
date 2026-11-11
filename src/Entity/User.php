@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
+use Scheb\TwoFactorBundle\Model\Email\TwoFactorInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -40,7 +41,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         // Les autres routes sont dans 'OpenApiFactory'
     ]
 )]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUserInterface, TwoFactorInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -83,6 +84,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
 
     #[ORM\Column(length: 255, options: ['default' => 'fr'])]
     private string $locale = 'fr';
+
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $authCode;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $pendingEmail = null;
@@ -334,6 +338,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, JWTUser
         $this->locale = $locale;
 
         return $this;
+    }
+
+    public function isEmailAuthEnabled(): bool
+    {
+        return true; // Il peut s'agir d'un champ persistant permettant d'activer ou de désactiver l'authentification par code de messagerie.
+    }
+
+    public function getEmailAuthRecipient(): string
+    {
+        return $this->email;
+    }
+
+    public function getEmailAuthCode(): string
+    {
+        if (null === $this->authCode) {
+            throw new \LogicException('The email authentication code was not set');
+        }
+
+        return $this->authCode;
+    }
+
+    public function setEmailAuthCode(string $authCode): void
+    {
+        $this->authCode = $authCode;
     }
 
     public function getPendingEmail(): ?string

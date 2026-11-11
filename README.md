@@ -493,7 +493,7 @@
 - La.. à une `version mineur`
     > On vas dans `composer.json` puis `CTRL + h` on met `8.0` la version à remplacé ensuite `8.5` pour les dépendances symfony et `composer update "Symfony/*"`, `--with-all-dependencies` pour mettre à jour les dépendances auxquelles il dépend aussi..
 
-**ApiPlatform** `api-platform.com`
+**Api Platform** `api-platform.com`
 - composer require api : On aura accès à l'url `/api` qui est une documentation généré grâce à `swagger ui` capable de lire les fichiers de définition `openApi` et de générer une interface graphique
     > Ou.. via ses release `github` qu'on peut utiliser si on veut directement mettre en ligne notre `ApiPlatfrom`
 - La configuration dans `config/packages/api_platform.yaml`
@@ -552,7 +552,7 @@
 - Pour indiquer l'authentification dans la documentation de `ApiPlatform` on a `OpenApiFactory`, pour plus d'infos voir la spécification de `openapi`
 - Par `json` : Va utiliser le système de cookie qui est `statefull` vu que c'est le serveur qui va valider la requête et fonctionne si l'api est sur le même domaine que notre application
     > Après avoir créer l'utilisateur dans `security.yaml` - `main` - `json_login`, ensuite on crée `SecurityController` - `jsonLogin` et `LogoutListener` pour la déconnexion
-    > Si on se connecte à `/login/json` en lui envoyant un `body json {"username": "admin", "password": "admin"}` on aura dans les `headers` un `Set-Cookie` qui va contenir le cookie correspondant à la session et l'a l'utilisateur est connecté, pour tester que l'authentification fonctionne on a `/fr/api/plateforme/me`
+    > Si on se connecte à `/login/json` en lui envoyant un `body json {"username": "admin", "password": "admin"}` on aura dans les `headers` un `Set-Cookie` qui va contenir le cookie correspondant à la session et là l'utilisateur est connecté, pour tester que l'authentification fonctionne on a `/fr/api/plateforme/me`
 
 - !! `form html` : L'authenticator par défaut, si on n'a déjà un système d'authentification sur le site et qu'on veut mettre en place des api pour certains points d'entrée de notre application, donc on n'a pas besoin de connecté l'utilisteur via l'api
     > On utilise l'authentification par `form-login` de symfony et si l'utilisteur s'y connecte il aura un cookie et si l'api se situe sur le même domaine ça va fonctionner mais il faut mettre dans `config/routes/api_platform.yaml` - `stateless` à `false` qui permet l'usage normal de la session sinon on aura l'erreur `Session was used while the request was declared stateless`
@@ -1002,13 +1002,116 @@
 
 
 
-scoop install ngrok
-ngrok config add-authtoken $YOUR_AUTHTOKEN
-ngrok http 80 --url https://proud-gauntlet-elongated.ngrok-free.dev
 
 
 
-**Symfony Reprise** : Le nouveau standart frontend pour les assets modernes via `Vite`
+composer require zenstruck/messenger-monitor-bundle
+
+ zenstruck/messenger-monitor-bundle  instructions:
+
+* You're almost ready to use zenstruck/messenger-monitor-bundle!
+
+* First, create a migration with symfony console make:migration
+  and run it with symfony console doctrine:migrations:migrate.
+
+* Visit /admin/messenger as a user with ROLE_ADMIN
+  to see the Dashboard UI.
+
+* Read the documentation at https://github.com/zenstruck/messenger-monitor-bundle
+
+Found 72 security vulnerability advisories affecting 24 packages.
+Run "composer audit" for a full list of advisories.
+Using version ^0.6.0 for zenstruck/messenger-monitor-bundle
+
+
+
+
+
+
+ApiPlatform :
+Le composant `Mcp` (exposer nos api aux agents ia) permet à nos ressources d'être directement consommé par les ia, 
+
+
+Le projet est en **4.2.15**. L'écart réel passe donc par 4.3 et 4.4. Lisons les sources.
+
+Voyons ce que cela coûte **ici**, concrètement.
+
+Vous êtes en **4.2.15**, et la 5.0 est sortie (patches jusqu'à 5.0.4). L'écart n'est donc pas « 4.2 → 5 » mais **trois versions** : 4.3, 4.4 et 5.0. J'ai mesuré ce que chacune coûte ici plutôt que de recopier les notes de version.
+
+## Aucun blocage de prérequis
+
+5.0 exige **PHP ≥ 8.2** et **Symfony ^7.4 || ^8.0**. Vous êtes en PHP 8.4 (8.5 à l'exécution) et Symfony 8.0. La porte est ouverte — c'est souvent là que ça coince, pas ici.
+
+## Ce qui change vraiment pour vous
+
+**Le vrai coût : 63 `#[ApiFilter]`.** Dépréciés en 4.4 au profit de `QueryParameter`, supprimés seulement en **6.0**. Le détail : 26 `SearchFilter`, 21 `OrderFilter`, 14 Boolean/Numeric/Exists/Date/Range/Enum, plus un filtre maison qui étend `AbstractFilter` (`PersonnelFilter`) — la classe de base est dépréciée elle aussi. Une commande `api:upgrade-filter` fait la conversion, mais sur 63 déclarations elle demandera une relecture : ma mémoire du projet garde le souvenir d'un filtre non déclaré qui répondait 200 avec la liste entière, en silence. C'est exactement la famille de défaut qu'une conversion automatique peut réintroduire.
+
+**Une rupture en 4.3 qui vous touche directement** : les filtres Doctrine à paramètres exigent désormais un `property` explicite, sinon `InvalidArgumentException`. **61 de vos 63 déclarations ont déjà `properties:`** — deux ne l'ont pas, à vérifier. Autant dire rien.
+
+**Le passage des erreurs de dénormalisation de 400 à 422** (5.0, avec payload `ConstraintViolation`) est le changement le plus visible côté clients. **Vos deux clients sont déjà prêts** : l'app Flutter teste `statusCode == 400 || statusCode == 422`, et le front sait lire les violations par champ. Ce serait même un gain — les messages tomberaient sous les champs au lieu d'un bandeau global.
+
+## Ce qui ne vous concerne pas
+
+Le changement le plus bruyant de la 5.0 — `jsonapi.use_iri_as_id` qui passe à `false` — **ne vous touche pas** : vos formats sont `jsonld`, `json` et `multipart`, pas JSON:API.
+
+Trois options supprimées (`enable_link_security`, `resource_class_directories`, `validator.query_parameter_validation`) **n'apparaissent nulle part dans votre configuration active** — seulement dans `config/reference.php`, qui est le fichier de référence généré.
+
+`ApiTestCase` part dans un paquet séparé `api-platform/test` : **le vôtre étend `WebTestCase` de Symfony**, pas celui d'API Platform. Vos 365 tests API ne bougent pas.
+
+Et **zéro entité en lecture seule**, donc la rupture 4.3 sur PUT/PATCH des entités `readOnly` ne vous atteint pas.
+
+## Ce que vous gagneriez
+
+Un gain qui vous est propre, en **4.3** : *les expressions `isGranted` sont évaluées avant le provider*. C'est exactement l'inverse du piège que vous aviez dû contourner — `MeProvider` et `CaisseScopeExtension` refusent l'utilisateur nul eux-mêmes pour éviter un 500 au lieu d'un 401. Ce contournement deviendrait inutile.
+
+Les autres, par ordre d'intérêt pour ce projet :
+
+- **`throwOnNotFound`** (4.4) : décider par opération si un `null` du provider rend 404. Vous avez plusieurs providers qui lancent `NotFoundHttpException` à la main.
+- **`repositoryMethod`** (4.4) : une opération pointe vers une méthode de repository **en gardant filtrage et pagination**. Vous avez beaucoup de contrôleurs qui interrogent les repositories en direct, justement pour sortir du périmètre — ceci pourrait en simplifier une partie.
+- **`routePriority`** (5.0) : l'ordre de correspondance des routes. C'est ce qui aurait réglé `/api/permissions/catalogue` capturé par `/api/permissions/{id}` ; vous le tenez aujourd'hui par `requirements: ['id' => '\d+']`, présent **156 fois**. Le patron actuel marche, je ne le changerais pas.
+- Filtres composables (`OrFilter`, `ComparisonFilter` avec `between`, `ChainFilter`, `FreeTextQueryFilter`), **OpenAPI 3.2**, Scalar en plus de Swagger UI, `hydra:memberAssertion`, méthode HTTP QUERY, et un composant **MCP** (4.3) pour exposer l'API à des agents.
+
+## Ce que j'en ferais
+
+Pas de bond direct. **4.2 → 4.3 → 4.4**, en traitant les dépréciations à chaque palier, puis 5.0 qui n'est alors presque plus qu'un retrait de code mort. Vos 586 tests sont ce qui rend cette montée raisonnable : c'est le filet qui dira ce que les notes de version ne disent pas.
+
+**Sources :** [changelog officiel](https://api-platform.com/docs/changelog/), [le billet de soyuka sur 4.4 et 5.0](https://soyuka.me/api-platform-4-4-and-5-0/), [composer.json de api-platform/core](https://github.com/api-platform/core/blob/main/composer.json), [release v5.0.0](https://github.com/api-platform/core/releases/tag/v5.0.0).
+
+
+
+
+
+
+
+Docker, ia, UI, Symfony, backups et backfill
+
+- `Symfony Language Tools` le serveur officiel LSP pour serveur langaguage protocol, il s'agit d'une extension Vscode qui permet de se rapprocher de l'expérience que l'on peut avoir dans `PhpStorm`, à un dépôt github dévélopper par symfony 
+- thepiratebay.org
+
+
+
+mettre à jour Symfony puis formulaire multi-step
+
+
+
+**ngrok** : !!
+- scoop install ngrok
+- ngrok config add-authtoken $YOUR_AUTHTOKEN
+- ngrok http 80 --url https://proud-gauntlet-elongated.ngrok-free.dev
+
+
+
+
+
+
+
+**Symfony Reprise** : Le nouveau standart frontend pour les assets modernes via `Vite` et `RsBuild`
+- L'avantage est que par défaut :
+    - Temps de compilation instantané (HMR)
+    - Gestion natives Sass, Typescript, Vue/React
+    - Minimification et Code Splitting intégrés (ne renvoi pas tout le javascript de l'application au navigateur en une seule fois mais découpé l'app en plusieurs fichiers et charger uniquement ce qui est néccéssaire)
+Une sorte d'adapteur 
+Vite/RsBuild(génère les assets compilés) -> Fichiers JSON(création de entrypoints.json et manifest.json) -> RepriseBundle(lit et analyse les fichiers en temps réel) -> Templates Twig(Rendu final exact pour le navigateur)
 
 
 **Stripe** : !! de `php`
@@ -1023,15 +1126,172 @@ ngrok http 80 --url https://proud-gauntlet-elongated.ngrok-free.dev
 web-push-php pour la notification push sur symfony :: pour configurer le serveur de not push, et on vas s'abonner à un pushmanager
 
 - Librairy :
-    - Openspout : permet de générer, lire des fichiers `excel` xlsx, `csv`, `ods` très rapide avec l'utilisation de la mémoire de moins de 3M : utile pour lire ou générer de gros fichiers
+    - Openspout : permet de générer, lire des fichiers `xlsx`, `csv`, `ods` très rapide avec l'utilisation de la mémoire de moins de 3M : utile pour lire ou écrire de gros fichiers :: composer require openspout/openspout
+        - dans `Domain/Exporter`, `ExcelFormatEnum`, `ExcelController`
+        - Pour l'import de données `ExcelReaderFactory`, `Importer/`
+
     - dompdf : !! des fichiers `pdf`
+        - On.. le bundle NucleosDompdfBundle `composer require nucleos/dompdf-bundle` qui est wrapper pour utiliser dompdf dans Symfony
+            - Config `config/packages/nucleos_dompdf.yaml`
+                - `defaults` - `chroot` : le chemin des assets du genre les images qu'on veut placer dans le fichier pdf
+                    defaultFont: 'helvetica'
+            - Dans `HomeController`, on a `PdfGeneratorService` pour gérer la génération de pdf
+            - Une autre manière de rendre un fichier pdf est de le streamé, permet de télécharger le fichier directement
+            - Pour insérer une image dans notre pdf `defaults` - `chroot` puis dans le `pdf.html.twig` mais attention il faut aussi redimensionné les images avant les mettre dans le pdf sinon ca va prendre un temps fou
+            - dompdf 3 supporte des choses du css moderne, voir doc : pour la personnalisation avec le css on..
+
+
+
+
+
+The content cannot be set on a StreamedResponse instance
+
+
+C'est la même famille d'erreur que la première fois. `BinaryFileResponse`, comme `StreamedResponse`, interdit `setContent()`, car son contenu est le fichier lui-même. Quelque chose dans votre application essaie donc de modifier le contenu de la réponse **après** que le contrôleur l'a retournée. Votre contrôleur n'est probablement pas en cause : le coupable est en général un *listener* sur l'événement `kernel.response`.
+
+## Trouver le coupable
+
+La trace complète de l'exception (page d'erreur Symfony, onglet « Stack Trace », ou `var/log/dev.log`) vous indiquera quelle classe appelle `setContent()`. Les suspects habituels sont :
+
+- un *event subscriber* de votre application ou d'un bundle qui réécrit le HTML des réponses (minification, injection d'un nonce CSP, remplacement de texte, etc.) sans vérifier le type de réponse ;
+- un bundle tiers qui fait la même chose ;
+- un listener qui intercepte une exception survenue pendant l'export et tente de remplacer le contenu.
+
+La commande suivante liste tous les listeners branchés sur cet événement :
+
+```bash
+php bin/console debug:event-dispatcher kernel.response
+```
+
+Si le coupable est un listener à vous, il suffit de l'écarter pour ce type de réponse :
+
+```php
+public function onKernelResponse(ResponseEvent $event): void
+{
+    $response = $event->getResponse();
+
+    if ($response instanceof BinaryFileResponse || $response instanceof StreamedResponse) {
+        return;
+    }
+
+    // ... traitement existant
+}
+```
+
+## Contournement immédiat
+
+Si le listener vient d'un bundle que vous ne pouvez pas modifier, vous pouvez renvoyer une `Response` classique. Elle accepte `setContent()`, donc le listener ne plantera plus. Pour de petits exports comme le vôtre, c'est sans inconvénient :
+
+```php
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Response;
+
+$file = $this->excelExporter->export($columnNames, $data, $format);
+
+$response = new Response(file_get_contents($file->getPathname()));
+$response->headers->set('Content-Type', $format->contentType());
+$response->headers->set(
+    'Content-Disposition',
+    HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, 'export.' . $format->extension())
+);
+
+unlink($file->getPathname());
+
+return $response;
+```
+
+Le fichier est chargé entièrement en mémoire. Pour des exports de plusieurs dizaines de Mo, il vaut mieux corriger le listener et revenir à `BinaryFileResponse`.
+
+Pouvez-vous coller la trace de l'exception, ou au moins les premières lignes qui suivent le message ? On verra tout de suite quelle classe appelle `setContent()`.
+
+
+Le `dd()` montre que votre contrôleur renvoie toujours une `StreamedResponse`, c'est-à-dire le code de départ, et pas la version avec `$this->file()`. Deux choses expliquent probablement que « rien ne se passe ».
+
+
+
+
+
+
+Le coupable est presque certainement **`App\EventListener\DogListener::onResponseEvent()`**, en première position de la liste. C'est le seul listener de votre application ; tous les autres viennent de Symfony ou de bundles connus, qui gèrent correctement les `BinaryFileResponse` et `StreamedResponse`. Votre `DogListener` doit appeler `$response->setContent(...)` sur toutes les réponses sans vérifier leur type.
+
+## Correction
+
+Ajoutez une garde au début de la méthode pour laisser passer les réponses qui n'ont pas de contenu modifiable :
+
+```php
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+
+public function onResponseEvent(ResponseEvent $event): void
+{
+    $response = $event->getResponse();
+
+    if ($response instanceof BinaryFileResponse || $response instanceof StreamedResponse) {
+        return;
+    }
+
+    // ... votre traitement existant
+}
+```
+
+Une variante plus générale consiste à vérifier `getContent()`. Ces deux types de réponse renvoient `false` au lieu d'une chaîne, donc ce test couvre aussi d'éventuelles autres sous-classes du même genre :
+
+```php
+$content = $response->getContent();
+if ($content === false) {
+    return;
+}
+```
+
+Si `DogListener` ne doit agir que sur des pages HTML, vous pouvez aussi vérifier le `Content-Type` :
+
+```php
+if (!str_contains((string) $response->headers->get('Content-Type'), 'text/html')) {
+    return;
+}
+```
+
+Avec cette correction, vous pouvez revenir à `$this->file(...)` et `BinaryFileResponse`, et oublier le contournement avec `file_get_contents`.
+
+## À propos du log
+
+Les lignes que vous avez collées ne contiennent pas l'exception. Ce sont uniquement des *deprecations* de niveau `INFO`, dues au fait que vous êtes sur PHP 8.5 et que certaines dépendances ne sont pas encore à jour. Elles sont sans danger, mais elles noient tout le reste. Pour retrouver une vraie erreur, cherchez plutôt les lignes `CRITICAL` ou `ERROR` :
+
+```powershell
+Select-String -Path var\log\dev.log -Pattern "CRITICAL|\.ERROR" | Select-Object -Last 5
+```
+
+Si l'erreur persiste après la correction de `DogListener`, collez-moi ce que renvoie cette commande ou le contenu du listener.
+
+
+
+
+
+## 2. Turbo intercepte peut-être le formulaire
+
+Votre projet utilise plusieurs paquets Symfony UX (Typed, Mercure). Si **Symfony UX Turbo** est installé, c'est lui qui soumet le formulaire via `fetch()`. Or Turbo attend une redirection ou du HTML. Quand il reçoit un fichier binaire, il ne déclenche pas de téléchargement, et il ne se passe rien de visible.
+
+Désactivez Turbo pour ce formulaire dans `export.html.twig` :
+
+```twig
+{{ form_start(form, {attr: {'data-turbo': 'false'}}) }}
+    {{ form_widget(form) }}
+    <button type="submit">Exporter</button>
+{{ form_end(form) }}
+```
+
+Avec ces deux corrections, le `dd($response)` devrait afficher une `BinaryFileResponse` avec un en-tête `content-disposition: attachment; filename=export.xlsx`, et le navigateur devrait lancer le téléchargement.
+
+
+
+
+
+
+
 
 
 - L'outil orval.dev permet à partir de fichiers openapi de générer les définitions typescript
-
-
-
-
 
 
 **Docker** !!
@@ -1161,3 +1421,1587 @@ docker compose logs -f php
 **Un point important** : Symfony Flex ajoute souvent lui-même des services au `compose.yaml` quand tu installes certains paquets. Par exemple, `composer require doctrine/doctrine-bundle` déclenche une "recipe" qui propose d'ajouter automatiquement le service de base de données correspondant — pas besoin de l'écrire à la main dans la plupart des cas.
 
 Si ton projet utilise Webpack Encore ou AssetMapper avec des dépendances Node, il est courant d'ajouter un service `node` séparé (ou une étape de build multi-stage) uniquement pour compiler les assets, sans l'embarquer dans l'image de production finale.
+
+
+
+
+
+
+
+
+
+
+
+
+- Pour créer une base de données `Sqlite`, `symfony console d:d:c`
+
+**2FA** : La double authentification via le bundle `SchebTwoFactorBundle`
+- composer require 2fa : Le flex l'intercepte et installe les dépendances néccéssaire ou `composer require scheb/2fa-bundle`
+    - Vous pouvez installer, si vous le souhaitez, des paquets supplémentaires pour étendre les fonctionnalités du bundle en fonction de vos besoins, par ex (Si on veut faire la double auth par email, on peut installer `composer require scheb/2fa-email` qui est une sorte d'extension au bundle) :
+        composer require scheb/2fa-backup-code : Ajouter une fonctionnalité de codes de secours
+        composer require scheb/2fa-trusted-device : Ajouter la fonctionnalité « Appareils de confiance »
+        composer require scheb/2fa-totp : Ajouter une authentification à deux facteurs via TOTP
+        composer require scheb/2fa-google-authenticator : Ajoutez l’authentification à deux facteurs avec Google Authenticator
+        composer require scheb/2fa-email : Ajoutez une authentification à deux facteurs par e-mail
+- La configuration `config/packages/scheb_2fa.yaml`
+- Dans `config/routes/scheb_2fa.yaml`, vous devez ajouter deux routes :
+un itinéraire pour le formulaire d'authentification à deux facteurs
+une autre méthode pour vérifier le code d'authentification à deux facteurs 
+- Pour le mettre en place `config/packages/security.yaml` - `firewalls` - `main`, puis `access_control` voir doc
+- Ensuite dans `config/packages/scheb_2fa.yaml`, on vas préciser la méthode que scheb doit  `PostAuthenticationToken` et on peut commenté l'autre
+    Étape 5 : Configurer les jetons de sécurité
+    Votre pare-feu peut proposer différentes méthodes de connexion. Par défaut (sans configuration), le module n'écoute que les jetons suivants :
+        Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken(authentification par nom d'utilisateur et mot de passe)
+        Symfony\Component\Security\Http\Authenticator\Token\PostAuthenticationToken(jeton par défaut utilisé par les authentificateurs)
+        Si vous souhaitez prendre en charge l'authentification à deux facteurs avec une autre méthode de connexion, vous devez enregistrer sa classe de jeton dans les scheb_two_factor.security_tokensoptions de configuration.
+- Étape 6 : Activer les méthodes d’authentification à deux facteurs
+    Si vous avez installé l'une des méthodes d'authentification à deux facteurs fournies en tant que sous-package, vous devez l'activer séparément. Consultez la procédure pour :
+    - scheb/2fa-totp Authentification TOTP
+    scheb/2fa-google-authenticator Authentificateur Google
+    scheb/2fa-email Authentification par code via e-mail
+
+- On a choisi l'Authentification par code via e-mail (Un fournisseur d'authentification à deux facteurs pour générer un code numérique aléatoire et l'envoyer à l'utilisateur par e-mail.) 
+
+Comment fonctionne l'authentification ?
+Une fois l'authentification réussie, un numéro aléatoire est généré et enregistré dans le compte utilisateur. Ce numéro est ensuite envoyé à l'utilisateur par courriel. L'utilisateur doit alors le saisir pour accéder au compte.
+
+Le nombre de chiffres peut être configuré et l'activation ect.. : dans `config/packages/scheb_2fa.yaml`
+- Puis on modifie le `User` vu qu'on devra sauvegarder le code qui va permettre de faire la double-authentification via l'interface `TwoFactorInterface`
+- Si il est activer par défaut `email - enabled: true`, quand on vas se connceter le bundle va comprendre qu'il y'a eu une connexion et vas nous envoyer un mail d'auth (utiliser docker pour que le serveur de développement de Symfony détecte qu'il y'a des variables d'env qui lui sont arrivées from docker et notemment un serveur de webmail)
+- On peut personnalisé le Modèle de formulaire d'authentification, voir doc
+- Pour que l'utilisateur puisse indiquer que l'appareil sur lequel il est connécté est fiable pour éviter de toujours lui demander de s'authentifié à deux fois, pour ça on vas mettre en place les appareils de confiance via le bundle `composer require scheb/2fa-trusted-device`, puis on l'a configurer dans `config/packages/scheb_2fa.yaml` - `trusted_device`, puis dans `config/packages/security.yaml` - `firewalls` - `main` - `two_factor`.. on indique qu'il faut l'utiliser
+
+
+- Ne pas oublié de gérer le cas ou il doit être activer par l'utilisateur via le profil !!
+
+- Via totp : La méthode la plus courante est le bundle **scheb/2fa-bundle**, avec des codes **TOTP** à 6 chiffres générés par une application comme Google Authenticator, Microsoft Authenticator ou Authy
+```bash
+composer require scheb/2fa-bundle scheb/2fa-totp
+composer require endroid/qr-code   # pour afficher le QR code
+```
+
+```yaml
+scheb_two_factor:
+    ...
+    totp:
+        enabled: true
+        issuer: 'Mon Site'          # nom affiché dans l'application
+        template: security/2fa_form.html.twig
+```
+Voir doc
+
+
+## Bonnes pratiques à ajouter
+
+- **Codes de secours** (`scheb/2fa-backup-code`) : des codes à usage unique, utiles si l'utilisateur perd son téléphone.
+- **Appareils de confiance** (`scheb/2fa-trusted-device`) : une case « Ne plus demander sur cet appareil pendant 30 jours ».
+- **Limiter les tentatives** : le bundle propose une option pour bloquer les essais répétés (force brute).
+- **Chiffrer le secret en base** : s'il fuit, la 2FA ne protège plus rien.
+- **Code par email** (`scheb/2fa-email`) : une alternative pour les utilisateurs sans application, mais moins sûre.
+- **HTTPS obligatoire** en production.
+
+
+
+
+
+
+
+**8.2**
+- Les `Dto` peuvent joué le rôle de formulaire via l'attribut `#[AsFormType]` et sur ses propriétés `#[FormField(EmailType::class)]`, `#[FormField]`.. dans le controller `createForm(Dto::class)`
+- Les workflows (le cycle de vie dans la class) via des attributs
+- Un bundle par composant au lieu du `FrameworkBundle` au par avant (Mailer, Cache, Form..), maintenant on aura plus
+- Chiffrement des données avec doctrine via l'attribut `#[Encrypted(key: 'customer.contact')]` sur nos propriétés (ex: L'application stocke des données sensibles comme des coordonnées personnels et on veut que les informations soit chiffrés dans la bd et aussi pouvoir à les maninipulés)
+- L'authentification par OpenID Connect sans bundle tiers : permet de se connecter avec un compte microsoft ou google ou keycloak
+- Reconfirmé l'identité, pas la session via le `#[IsGranted('IS_AUTHENTICATED_VERY_RECENTLY')]` pour les actions sensibles : Action sensible -> Réauth -> Action autorisée(mais la session ne change pas), il y'a deux durées de références 2H et 5min et peut être configuré, l'intérêt est de limité les risques lorsqu'une session est resté ouverte pendant longtemps sur un ordinateur auquel quelqu'un pourrait accéder :: Appelé le SUDO MODE
+- Messenger 
+    - La base et le broker, même transaction : pour le message async messenger (le message ne part que si la commande est enregistrée) `outbox`
+    - Ne jamais rejouer un message `inbox`
+    - Un worker, plusieurs messages en parallèle via le paramètre  `php.. messenger:consume async --concurrency=4`
+- Email templates
+Plus d'infos : `symfony.com/doc/current/` doc officielle, `../blog/category/living-on-the-edge/8.2` tous les articles
+
+
+
+
+
+
+- 
+Php - Langage Backend
+  - Présentation du langage
+  - Installation du langage
+  - Les variables
+  - !! tableaux
+  - !! conditions
+  - !! boucles
+  - !! fonctions
+  - !! fonctions utilisateurs
+  - Require & include
+  - Php & html
+  - Traitement des formulaires
+  - Les dates
+  - Lecture de fichiers
+  - Ecriture de fichiers
+  - Les cookies
+  - La session
+  - Tp.. Compteur de vues
+  - !! dashbord
+  - !! système de connexion
+  - Chiffrer les mots de passe
+  - L'objet DateTime
+  - Les class
+  - !! Statique
+  - L'héritage des class
+  - Tp.. Livre d'or
+  - Utiliser une API avec cURL
+  - Les Exceptions
+  - PHPDoc
+  - PDO - Connexion à une base de données
+  - Les espaces de noms `namespace`
+  - L'autoloader
+  - Utiliser des librairies tierces
+  - Les fonctions anonymes
+  - Le router
+  - ob_start
+  - Tp.. Tableau dynamique
+  - !! Classe d'authentification
+  - !! Tester son code
+  - !! Pratiquer les tests
+  - !! QueryBuilder
+  - !! Classe Table
+  - Présentation du projet
+    - Création de la structure
+    - Le routeur
+    - Remplir la base de données
+    - Listing d'articles
+    - Pagination
+    - Simplifions l'URL
+    - Page article
+    - Page catégorie
+    - Réorganisation
+    - Affichage des catégories sur le listing
+    - Création de la classe Table
+    - Administration du site
+    - Edition d'un article
+    - Gestion des formulaires
+    - Valider les données
+    - Création d'un article
+    - Gestion des catégories
+    - Liaison article catégorie
+    - Upload d'images !!
+    - Authentification
+    - Mise en ligne
+
+Symfony - Framework backend
+  - Présentation du framework
+  - Installation du framework
+  - Nos premières pages
+  - Moteur de templates
+  - L'ORM Doctrine
+  - Les formulaires
+  - Valider les données
+  - Comprendre les services
+  - Asset et Mapper - Pour gérer les assets
+  - TP Formulaire de contact
+    - Envoi d'email via le composant Mailer
+  - TP Catégorie
+  - ORM relation ManyToOne
+  - Envoi de fichiers
+  - Le composant sécurité
+  - Paginer les données
+  - Doctrine avancé Select partiel et DQL
+  - Création d'une API, le serializer
+  - Création d'une API, Désérialisation et MapRequestPayload
+  - Créer une API, Authenticator stateless
+  - Les fixtures pour remplir la base de données
+  - Permissions avancées avec les Voter
+  - Les évènements
+  - Symfony UX
+  - Formulaires imbriqués
+  - Tâche asynchrone avec Messenger
+  - Internationalisation
+  - Héberger sur un mutualisé O2Switch via ssh et git
+  - Héberger sur un mutualisé Infomaniak via ssh et git
+  - ValueResolver
+
+- API Platform - Framework API REST
+  - Présentation du framework
+  - Installation du framework
+  - La sérialisation
+  - La validation
+  - Pagination et Filtres
+  - Fonctionnement d'API Platform
+  - Opération personnalisé
+  - Améliorer la documentation OpenAPI
+  - Créer un DataProvider
+  - Créer un DataPersister
+  - PUT vs PATCH
+  - Authentification JSON
+  - !! Form HTML
+  - !! JWT
+  - Rafraichir les tokens JWT
+  - !! par clef d'API
+  - Limiter les ressources par utilisateur via DoctrineExtension
+  - Injecter l'utilisateur via un Denormalizer
+  - Limiter les champs exposés en changeant les groupes de serialization dynamiquement
+  - Envoi de fichiers
+  - Désérializer du multipart
+
+JavaScript - Langage intéractif :: Le principale
+Css - Langage de style :: Le principale
+SQL - Langage pour communiquer avec une base de données
+React - Framework frontend
+
+
+Question pour dev :
+- Le dernier ticket (problème de concurence) : Tu développe une appliction pour une platform de billeterie, il reste un seule ticket, 2 personnes clique sur acheter au même moment depuis 2 pays différents, les 2 transactions arrive presque simultanement sur deux serveurs distints
+  - Question : Comment garentir qu'un seul utilisateur obtienne le ticket même si les 2 paiements sont lancés en parallèle et que faire si le paiement du gagnant échoue
+- Le paiement fantôme (problème d'idempotence) : Un client éffectue un paiement de 500$, le serveur traite correctement la transaction mais la connexion internet coupe avant que le client reçoive la confirmation, le client clique de nouveau sur payer entre-temps, son application a également déclenché trois tentatives automatiques
+  - !! : Comment garentir que le client ne sera débité qu'une seule fois même si le serveur reçoit 5 requêtes identiques ou si plusieurs workers les traitent simultanément
+- La base de données qui tombe (problème de résilience) : Tu développe une application bancaire utilisé par 2milions de personnes. Pendant un transfert d'argent le serveur débite le compte A de 100$ puis tombe avant de créditer le compte B
+  - !! : Comment concevoir ton système pour qu'aucun argent ne disparaisse et qu'aucun transfert ne soit exécuter 2 fois même si un serveur tombe au milieu de l'opération
+- Un milion d'utilisateur (problème de scalabilité) : Ton application fonctionne parfaitement avec 1.000 utilisateurs, un influenceur partage son lien et en quelque minutes 1.000.000 de personnes tentent de se connecter, le CPU atteint 100%, la base de données sature et le site devient inaccessible
+  - !! : Comment concevoir une architecture capable d'absorber ce trafic sans perdre de données sans mulitiplier inutilement les coûts et sans rendre l'application indisponible
+- Le compte administrateur (problème de sécurité) : Tu développe une application ou chaque utilisateur possède un identifiant, un utilisateur authentifié découvre qu'en remplaçant /api/user/5 en /api/user/6 il peut consulter les informations privées d'un autre utilisateur
+  - !! : Comment empêcher définitivement ce type d'accès non autorisé même si l'attaquant manipule les requêtes HTTP, les identifiants et les paramètres envoyés au serveur
+- Le serveur qui tombe pendant une commande (problème de fiabilité) : Un client commande un produit, le paiement est validé, le stock est dimunué mais le serveur tombe avant d'enregister la commande, le client à payer mais aucune commande n'apparaît dans son historique
+  - !! : Comment garentir la cohérence entre le paiement, le stock et la commande lorsque ces opérations sont exécutées par trois services indépendants
+- La mise à jour sans intéruption (problème de déploiment) : Ton application est utilisé 24h/24h, tu dois modifier un colonne critique de la base de données et déployer une nouvelle version du backend, mais des miliers d'utilisateur utilisent encore l'ancienne version pendant le déploiment
+  - !! : Comment effectuer cette migration sans intérompre le service, sans cassé l'ancienne version et avec la possibilité de revenir en arrière si le nouveau code présente un bug
+- Deux appareils, une même donnée (problème de syncronisation) : Un utilisateur ouvre son application de gestion financière sur deux téléphones, sur le premier, sans connexion internet, il modifie son buget de 500$ à 300$, sur le sécond également hors-ligne il le modifie de 500$ à 700$, les deux téléphones retrouvent internet au même moement 
+  - !! : Quel valeur le système doit-il conserver, comment détecter et résoudre ce conflit sans écraser silencieusement une modification légitime
+- L'intéligence artificielle qui invente (problème de fiabilité de l'IA) : Tu intègre une IA dans une application juridique, un utilisateur pose une question sur le droit du travail, l'IA répond avec assurence en citant un article de loi inexistent, la répense semble parfaitement crédible
+  - !! : Comment concevoir une architecture qui vérifie les références juridiques, distingue les informatons vérifiées des interprétations et refuse de repondre lorsque les preuves sont insuffisantes
+- 2 serveurs, 2 vérités (problème de système distribués) : Tu développe une platforme banquaire avec des serveurs en Afrique et en Europe, une panne réseau empêche temporairement les deux régions de communiquer. Pendant cette panne un utilisateur tente de retirer les même 1000$ depuis deux régions différentes, chaque serveur possède une copie  des données indiquant un solde de 1000$ 
+  - !! : Comment empêcher les deux retraits d'être validés ? faut-il bloquer certaines opérations pendant la panne ou privilégier la disponibilité ? Comment justifier ce choix
+
+:: Donne moi d'autres question de ce genre
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Vu tout ce que nous avons construit ensemble, si ton objectif est d'avoir un **logiciel professionnel de gestion de compagnies de transport** (multi-entreprises, multi-gares, réservations, exploitation, temps réel, application mobile, etc.), je partirais sur une architecture moderne plutôt que de simplement changer de framework.
+
+## Backend
+
+Je garderais **Symfony**.
+
+Pourquoi ?
+
+* Tu maîtrises déjà Symfony.
+* API Platform est excellent pour construire des API REST.
+* L'écosystème est mature.
+* Facile à faire évoluer vers des microservices plus tard si nécessaire.
+
+J'ajouterais :
+
+* **API Platform**
+* **PostgreSQL** (je le préfère à MySQL pour ce type d'application)
+* **Redis** (cache, files d'attente, sessions, verrous)
+* **Messenger** (traitements asynchrones)
+* **Mercure ou WebSocket** pour le temps réel
+
+---
+
+## Frontend Web
+
+Je passerais sur **Next.js**.
+
+Pourquoi ?
+
+* Très performant.
+* Excellent avec React.
+* Facile pour construire un tableau de bord riche.
+* Très bon pour les SaaS.
+
+Tu avais d'ailleurs demandé si React ou Next.js était préférable pour consommer ton backend Symfony : je resterais sur **Next.js**.
+
+---
+
+## Mobile
+
+Je garderais **Flutter**.
+
+Tu as déjà créé le projet.
+
+Un seul code pour :
+
+* Android
+* iOS
+
+---
+
+## Temps réel
+
+Pour le suivi des voyages, je ne me limiterais pas à Mercure.
+
+Je mettrais :
+
+* WebSocket
+* ou Mercure si tu restes sur Symfony
+
+Pour afficher :
+
+* position du car
+* retards
+* ventes
+* nouveaux tickets
+* nouvelles réservations
+
+sans recharger la page.
+
+---
+
+## Cartographie
+
+Pour le suivi GPS :
+
+* Google Maps
+* ou OpenStreetMap + Leaflet (moins coûteux)
+
+Tu pourras afficher :
+
+* le trajet ;
+* la position du car ;
+* les gares ;
+* les retards.
+
+---
+
+## Notifications
+
+* Firebase Cloud Messaging (Flutter)
+* Emails
+* SMS (si besoin)
+
+---
+
+## Authentification
+
+* JWT
+* Refresh Token
+* Gestion fine des rôles (tu as déjà un bon modèle RBAC)
+
+---
+
+## Déploiement
+
+* Docker
+* Nginx
+* GitHub Actions
+* VPS ou Cloud
+
+---
+
+## Base de données
+
+Je passerais sur **PostgreSQL**.
+
+Avec notamment :
+
+* index performants ;
+* transactions solides ;
+* types avancés ;
+* possibilité d'utiliser des extensions géographiques si tu ajoutes beaucoup de fonctionnalités GPS.
+
+---
+
+# Si tu veux vraiment du temps réel
+
+Je pense que ton application aura besoin de deux types de temps réel.
+
+### 1. Temps réel métier
+
+Exemple :
+
+* un ticket est vendu ;
+* une réservation est créée ;
+* un voyage est annulé.
+
+Tous les écrans concernés se mettent à jour automatiquement.
+
+---
+
+### 2. Temps réel GPS
+
+Le chauffeur possède l'application Flutter.
+
+Toutes les 10 à 30 secondes :
+
+```text
+Latitude
+
+Longitude
+
+Vitesse
+
+Heure
+```
+
+sont envoyées au serveur.
+
+L'application web affiche alors :
+
+* le car sur la carte ;
+* le retard ;
+* le prochain arrêt.
+
+---
+
+# Si je devais repartir de zéro aujourd'hui
+
+Je choisirais :
+
+| Couche          | Technologie                             |
+| --------------- | --------------------------------------- |
+| Backend         | Symfony + API Platform                  |
+| Base de données | PostgreSQL                              |
+| Cache           | Redis                                   |
+| Temps réel      | Mercure + WebSocket (selon les besoins) |
+| Web             | Next.js + React Query + TypeScript      |
+| Mobile          | Flutter                                 |
+| Cartographie    | Google Maps ou Leaflet                  |
+| Auth            | JWT + Refresh Token                     |
+| Déploiement     | Docker + Nginx + GitHub Actions         |
+
+## Mon dernier conseil
+
+Au vu de l'évolution de ton projet, je pense que le plus grand changement ne sera **pas la technologie**, mais **l'architecture métier**.
+
+Tu commences à intégrer des notions d'exploitation en temps réel (passage dans les gares, retards, suivi des cars, bordereaux, statistiques, réservations, multi-gares). À ce stade, je structurerais le projet autour de grands domaines fonctionnels (Administration, Exploitation, Billetterie, Réservations, Flotte, Stock, Comptabilité, etc.) plutôt que d'une simple organisation par entités.
+
+C'est cette organisation qui fera réellement passer ton application d'un CRUD évolué à un logiciel professionnel de gestion de compagnies de transport.
+
+
+
+
+
+
+
+Si je fais abstraction de tes préférences et que je me place dans le contexte d'un **éditeur de logiciel (SaaS) pour compagnies de transport** qui vise plusieurs centaines de compagnies et des milliers de voyageurs, voici la stack que je choisirais aujourd'hui.
+
+## Backend
+
+* **Java 21**
+* **Spring Boot 3**
+* Spring Security
+* Spring Data JPA
+* Spring WebFlux (si besoin de traitements réactifs)
+* Hibernate
+
+Pourquoi ?
+
+* C'est le standard des grandes entreprises.
+* Excellentes performances.
+* Très robuste.
+* Énorme écosystème.
+* Très adapté aux applications critiques.
+
+---
+
+## Base de données
+
+* **PostgreSQL**
+
+Pourquoi ?
+
+* Très fiable.
+* Transactions ACID.
+* Excellent pour les fortes charges.
+* Support GIS avec PostGIS.
+* Très utilisé dans le transport.
+
+---
+
+## Cache
+
+* Redis
+
+Pour :
+
+* sessions
+* cache
+* disponibilité des sièges
+* notifications
+
+---
+
+## Messaging
+
+* Apache Kafka
+
+Pour gérer :
+
+* Ticket vendu
+* Réservation créée
+* Paiement reçu
+* Position GPS
+* Notification
+
+Chaque événement est diffusé aux autres services.
+
+---
+
+## Temps réel
+
+* WebSocket
+* Kafka
+
+Le GPS des cars est envoyé en temps réel.
+
+Les tableaux de bord se mettent à jour automatiquement.
+
+---
+
+## GPS
+
+* PostGIS
+* OpenStreetMap
+* Google Maps (si le budget le permet)
+
+---
+
+## Frontend Web
+
+* React
+* Next.js
+* TypeScript
+
+Aujourd'hui, c'est probablement la combinaison la plus utilisée.
+
+---
+
+## Mobile
+
+* Flutter
+
+Pourquoi ?
+
+* Android
+* iOS
+* Web (si besoin)
+
+Une seule base de code.
+
+---
+
+## Authentification
+
+* OAuth2
+* OpenID Connect
+* JWT
+
+---
+
+## Recherche
+
+* Elasticsearch
+
+Pour rechercher rapidement :
+
+* voyageurs
+* tickets
+* voyages
+* bagages
+
+---
+
+## Stockage
+
+* S3 (ou compatible S3 comme MinIO)
+
+Pour :
+
+* tickets PDF
+* pièces jointes
+* images
+
+---
+
+## Monitoring
+
+* Prometheus
+* Grafana
+
+Pour surveiller :
+
+* CPU
+* mémoire
+* temps de réponse
+* nombre de voyages
+* erreurs
+
+---
+
+## Logs
+
+* Loki
+* Grafana
+
+ou
+
+* ELK Stack
+
+---
+
+## Conteneurisation
+
+* Docker
+
+---
+
+## Orchestration
+
+* Kubernetes
+
+---
+
+## CI/CD
+
+* GitHub Actions
+
+ou
+
+* GitLab CI
+
+---
+
+# Si l'application devient très grosse
+
+Je passerais progressivement en microservices.
+
+```text
+API Gateway
+
+├── Auth Service
+├── Billetterie Service
+├── Réservation Service
+├── Exploitation Service
+├── GPS Tracking Service
+├── Paiement Service
+├── Notification Service
+├── Stock Service
+├── Reporting Service
+```
+
+Chaque service possède sa propre base de données.
+
+Ils communiquent via Kafka.
+
+---
+
+# Pourquoi Java plutôt que Node, Go ou .NET ?
+
+Pour un logiciel de transport, les critères sont :
+
+* disponibilité 24h/24 ;
+* transactions fiables ;
+* concurrence importante ;
+* maintenance sur plusieurs années.
+
+Dans ce contexte :
+
+* **Java/Spring Boot** est un choix très répandu chez les grands éditeurs de logiciels métiers.
+* **.NET** serait également un excellent choix, notamment dans les entreprises fortement orientées Microsoft.
+* **Go** est remarquable pour les services très performants (par exemple un service de suivi GPS), mais son écosystème métier est moins riche.
+* **Node.js** est très performant pour les applications temps réel, mais beaucoup d'éditeurs privilégient Java ou .NET pour les traitements métiers complexes.
+
+---
+
+# La stack que j'utiliserais pour un SaaS de niveau entreprise
+
+| Couche           | Technologie                  |
+| ---------------- | ---------------------------- |
+| Backend          | Java 21 + Spring Boot        |
+| Base de données  | PostgreSQL + PostGIS         |
+| Cache            | Redis                        |
+| Temps réel       | WebSocket                    |
+| Bus d'événements | Apache Kafka                 |
+| Frontend         | Next.js + React + TypeScript |
+| Mobile           | Flutter                      |
+| Cartographie     | OpenStreetMap ou Google Maps |
+| Recherche        | Elasticsearch                |
+| Stockage         | S3 / MinIO                   |
+| Monitoring       | Prometheus + Grafana         |
+| Logs             | Loki ou ELK                  |
+| Conteneurisation | Docker                       |
+| Orchestration    | Kubernetes                   |
+| CI/CD            | GitHub Actions ou GitLab CI  |
+
+C'est une architecture que l'on retrouve, avec des variantes, dans de nombreuses plateformes professionnelles de logistique, de transport et de mobilité. Elle est conçue pour être scalable, résiliente et maintenable sur le long terme.
+
+
+
+
+
+
+
+
+
+Le **temps réel** est une notion qui est souvent mal comprise. Beaucoup pensent que cela signifie "rafraîchir la page toutes les secondes", alors qu'en réalité, le principe est différent.
+
+---
+
+# Le principe du temps réel
+
+Dans une application classique, c'est le **client** qui demande les informations.
+
+```text
+Navigateur
+      │
+      │ "Y a-t-il du nouveau ?"
+      ▼
+Serveur
+      │
+      ▼
+Réponse
+```
+
+Par exemple :
+
+* tu ouvres la liste des tickets ;
+* tu appuies sur F5 ;
+* le navigateur redemande les données.
+
+C'est le modèle **Request / Response**.
+
+---
+
+## En temps réel
+
+C'est l'inverse.
+
+Le navigateur ouvre une connexion qui reste active.
+
+```text
+Navigateur
+      ▲
+      │
+Connexion ouverte
+      │
+      ▼
+Serveur
+```
+
+Lorsque quelque chose se produit :
+
+```text
+Ticket vendu
+
+↓
+
+Serveur
+
+↓
+
+Le serveur pousse l'information
+
+↓
+
+Tous les navigateurs concernés sont mis à jour.
+```
+
+Le client n'a rien demandé.
+
+---
+
+# Exemple dans ton application
+
+Imagine trois postes.
+
+```text
+Guichet Abidjan
+
+Commercial
+
+Administrateur
+```
+
+Le commercial vend un ticket.
+
+Sans temps réel :
+
+* le guichet ne voit rien ;
+* l'administrateur ne voit rien.
+
+Ils doivent actualiser.
+
+---
+
+Avec le temps réel :
+
+```text
+Commercial
+
+↓
+
+Ticket vendu
+
+↓
+
+Serveur
+
+↓
+
+Notification
+
+↓
+
+Guichet
+
+↓
+
+Administrateur
+```
+
+Tout se met à jour automatiquement.
+
+---
+
+# Le GPS
+
+Même principe.
+
+Le téléphone Flutter envoie :
+
+```text
+Latitude
+
+Longitude
+
+Vitesse
+```
+
+Toutes les 15 secondes.
+
+Le serveur reçoit.
+
+Puis :
+
+```text
+Serveur
+
+↓
+
+WebSocket
+
+↓
+
+Toutes les cartes affichent
+la nouvelle position.
+```
+
+---
+
+# Les technologies
+
+Il existe plusieurs solutions.
+
+## Polling
+
+Toutes les 5 secondes :
+
+```text
+Client
+
+↓
+
+As-tu du nouveau ?
+
+↓
+
+Serveur
+
+↓
+
+Non
+```
+
+Puis encore :
+
+```text
+Client
+
+↓
+
+As-tu du nouveau ?
+
+↓
+
+Serveur
+
+↓
+
+Non
+```
+
+Puis :
+
+```text
+Client
+
+↓
+
+As-tu du nouveau ?
+
+↓
+
+Serveur
+
+↓
+
+Oui
+```
+
+Simple.
+
+Mais très gourmand.
+
+---
+
+## Long Polling
+
+Le serveur garde la requête ouverte.
+
+Moins de trafic.
+
+---
+
+## Server Sent Events (SSE)
+
+Le serveur envoie uniquement des messages.
+
+Symfony utilise **Mercure**.
+
+Très pratique.
+
+---
+
+## WebSocket ⭐⭐⭐⭐⭐
+
+Le navigateur ouvre une connexion.
+
+Elle reste ouverte.
+
+Les deux côtés peuvent envoyer des données.
+
+```text
+Navigateur
+⇅
+Serveur
+```
+
+C'est la solution la plus complète.
+
+---
+
+# Est-ce que cela fonctionne sur un hébergement mutualisé ?
+
+La réponse est : **ça dépend de la technologie utilisée.**
+
+## Polling
+
+✅ Oui.
+
+Tous les hébergeurs le permettent.
+
+Mais ce n'est pas du vrai temps réel.
+
+---
+
+## Mercure
+
+En général :
+
+❌ Non sur un mutualisé classique.
+
+Pourquoi ?
+
+Mercure nécessite un serveur dédié (ou un service managé) qui garde des connexions ouvertes en permanence. Les hébergements mutualisés autorisent rarement ce type de processus.
+
+---
+
+## WebSocket
+
+Là encore :
+
+❌ Généralement non.
+
+Les WebSockets demandent un serveur qui reste actif en permanence, ce qui est incompatible avec la plupart des offres mutualisées.
+
+---
+
+# Pourquoi ?
+
+Sur un mutualisé :
+
+```text
+Apache
+
+↓
+
+PHP démarre
+
+↓
+
+Traite la requête
+
+↓
+
+PHP s'arrête
+```
+
+Il n'y a aucun processus qui reste vivant.
+
+---
+
+En WebSocket :
+
+```text
+Serveur
+
+↓
+
+Reste vivant
+
+24h/24
+
+↓
+
+Écoute les connexions
+```
+
+Il faut donc un VPS, un serveur dédié ou un service spécialisé.
+
+---
+
+# Dans ton cas
+
+Tu m'avais indiqué que tu utilises actuellement un **hébergement mutualisé**.
+
+Je procéderais ainsi :
+
+### Phase 1
+
+Application classique.
+
+À chaque action importante :
+
+* vente de ticket ;
+* réservation ;
+* bagage ;
+
+on fait un rafraîchissement intelligent.
+
+Par exemple avec **React Query** ou **TanStack Query** :
+
+* toutes les 10 secondes ;
+* ou au focus de la fenêtre.
+
+Le coût reste faible.
+
+---
+
+### Phase 2
+
+Quand ton SaaS commencera à avoir plusieurs compagnies clientes et un besoin de suivi en direct (GPS, tableau d'exploitation, notifications instantanées), tu migreras vers un **VPS** ou un cloud.
+
+À ce moment-là, tu pourras activer :
+
+* WebSockets ;
+* Mercure ;
+* Redis ;
+* éventuellement Kafka si la plateforme prend beaucoup d'ampleur.
+
+---
+
+## Ma recommandation
+
+Pour ton application actuelle, **je ne chercherais pas à implémenter un véritable temps réel tant que tu restes sur un hébergement mutualisé**. Le coût et les contraintes techniques ne sont pas justifiés.
+
+En revanche, je **concevrais dès maintenant l'architecture** (événements métier, services, séparation des responsabilités) de manière à pouvoir remplacer plus tard un simple polling par du WebSocket ou Mercure sans devoir réécrire toute l'application. Ainsi, tu pourras évoluer vers un véritable temps réel lorsque l'infrastructure le permettra.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Le **backup** (ou **sauvegarde**) est le principe qui consiste à **conserver une copie des données** afin de pouvoir les restaurer en cas de problème.
+
+Le mot clé est **restauration**. Une sauvegarde n'a de valeur que si elle peut être restaurée.
+
+---
+
+# Pourquoi faire des backups ?
+
+Imagine que ton application de transport est en production.
+
+Un jour :
+
+* un développeur supprime accidentellement la table `reservation` ;
+* une mise à jour contient un bug qui efface des données ;
+* le disque du serveur tombe en panne ;
+* un pirate supprime la base de données ;
+* une migration échoue et corrompt certaines données.
+
+Sans sauvegarde, tu perds tout.
+
+Avec un backup, tu peux revenir à un état précédent.
+
+---
+
+# Que sauvegarde-t-on ?
+
+## 1. La base de données
+
+C'est le plus important.
+
+Par exemple :
+
+* utilisateurs ;
+* réservations ;
+* billets ;
+* paiements ;
+* voyages.
+
+Sous PostgreSQL :
+
+```bash
+pg_dump transport > backup.sql
+```
+
+Sous MySQL :
+
+```bash
+mysqldump transport > backup.sql
+```
+
+---
+
+## 2. Les fichiers
+
+Par exemple :
+
+* les avatars ;
+* les logos des entreprises ;
+* les pièces jointes ;
+* les factures PDF ;
+* les billets PDF.
+
+Si tu sauvegardes seulement la base mais pas les fichiers, tu risques d'avoir des références vers des fichiers inexistants après une restauration.
+
+---
+
+## 3. Les configurations
+
+On sauvegarde également :
+
+* les variables d'environnement (`.env`) ;
+* les certificats SSL ;
+* les configurations du serveur ;
+* les scripts de déploiement.
+
+---
+
+# Les différents types de backups
+
+## 1. Backup complet (Full Backup)
+
+On copie tout.
+
+Exemple :
+
+```text
+Base de données entière
++
+Tous les fichiers
+```
+
+Avantages :
+
+* restauration simple ;
+* fiable.
+
+Inconvénients :
+
+* prend du temps ;
+* consomme plus d'espace disque.
+
+---
+
+## 2. Backup incrémental
+
+On sauvegarde uniquement ce qui a changé depuis la dernière sauvegarde.
+
+Exemple :
+
+Lundi :
+
+```
+100 Go
+```
+
+Mardi :
+
+```
++ 300 Mo
+```
+
+Mercredi :
+
+```
++ 150 Mo
+```
+
+Jeudi :
+
+```
++ 700 Mo
+```
+
+On ne recopie jamais les 100 Go à chaque fois.
+
+C'est beaucoup plus rapide.
+
+---
+
+## 3. Backup différentiel
+
+On sauvegarde tout ce qui a changé depuis le dernier **backup complet**.
+
+Exemple :
+
+Lundi :
+
+```
+Full Backup
+100 Go
+```
+
+Mardi :
+
+```
+500 Mo
+```
+
+Mercredi :
+
+```
+900 Mo
+```
+
+Jeudi :
+
+```
+1,2 Go
+```
+
+Chaque sauvegarde contient toutes les modifications depuis lundi.
+
+---
+
+# Fréquence des sauvegardes
+
+Cela dépend de l'application.
+
+Pour un SaaS de transport :
+
+* sauvegarde complète chaque nuit ;
+* sauvegarde incrémentale toutes les heures (ou plus fréquemment selon les besoins).
+
+Ainsi, si un problème survient à 14h30, tu ne perds qu'une petite partie des données récentes.
+
+---
+
+# Où stocker les backups ?
+
+Une erreur fréquente consiste à sauvegarder sur le même serveur que l'application.
+
+```
+Serveur
+
+Application
+Base
+Backup
+```
+
+Si le disque tombe en panne, tout disparaît.
+
+La bonne pratique est de stocker les sauvegardes sur un autre support :
+
+```
+Serveur A
+Application
+
+↓
+
+Serveur B
+Backups
+```
+
+ou dans un stockage cloud.
+
+---
+
+# La restauration (Restore)
+
+Faire un backup ne suffit pas.
+
+Il faut pouvoir restaurer.
+
+Exemple :
+
+```bash
+psql transport < backup.sql
+```
+
+ou
+
+```bash
+mysql transport < backup.sql
+```
+
+De nombreuses entreprises testent régulièrement leurs sauvegardes sur un serveur de test pour vérifier qu'elles sont réellement exploitables.
+
+---
+
+# La règle du 3-2-1
+
+C'est une bonne pratique très connue :
+
+* **3 copies** des données ;
+* sur **2 supports différents** ;
+* dont **1 copie hors site** (autre serveur ou cloud).
+
+Exemple :
+
+* les données de production ;
+* une sauvegarde sur un NAS ;
+* une sauvegarde dans un stockage cloud.
+
+Ainsi, même si un site entier est indisponible, tu conserves une copie.
+
+---
+
+# Backup ≠ Haute disponibilité
+
+Ces notions sont souvent confondues.
+
+Le **backup** sert à récupérer des données perdues.
+
+La **haute disponibilité** sert à maintenir le service en ligne lorsqu'un serveur tombe en panne.
+
+Par exemple :
+
+* si un développeur supprime accidentellement 10 000 réservations, un serveur de secours répliquera aussi cette suppression. Il faudra restaurer les données depuis une sauvegarde.
+* si un serveur tombe en panne mais que tu as un second serveur prêt à prendre le relais, les utilisateurs peuvent continuer à utiliser l'application sans interruption.
+
+Ces deux mécanismes sont complémentaires.
+
+---
+
+# Exemple concret avec ton SaaS de transport
+
+Imaginons qu'à **14h00**, une migration défectueuse supprime toutes les réservations.
+
+Tu disposes de :
+
+* une sauvegarde complète réalisée à **00h00** ;
+* des sauvegardes incrémentales effectuées toutes les heures : **01h00, 02h00, ..., 13h00**.
+
+Tu peux restaurer :
+
+1. la sauvegarde complète de **00h00** ;
+2. puis appliquer les sauvegardes incrémentales jusqu'à **13h00**.
+
+Tu récupères ainsi presque toutes les données. Les seules informations potentiellement perdues sont celles créées entre **13h00** et **14h00**, sauf si tu disposes d'une fréquence de sauvegarde encore plus élevée ou d'autres mécanismes comme les journaux de transactions.
+
+En résumé, les sauvegardes sont une composante essentielle de l'exploitation d'une application en production. Elles protègent contre les erreurs humaines, les bugs, les pannes matérielles et les incidents de sécurité, et elles doivent toujours être pensées avec leur stratégie de restauration, leur fréquence, leur emplacement de stockage et des tests réguliers de récupération.
+
+
+
+
+
+
+
+
+
+Le **backfill** est un principe qui consiste à **remplir des données manquantes après coup**. En d'autres termes, on exécute un traitement qui met à jour des données déjà présentes dans la base pour les rendre compatibles avec une nouvelle fonctionnalité ou une nouvelle règle métier.
+
+### Exemple simple
+
+Imaginons que tu aies une table `voyage` :
+
+| id | destination  | distance |
+| -- | ------------ | -------- |
+| 1  | Yamoussoukro | 240      |
+| 2  | Bouaké       | 350      |
+
+Quelques mois plus tard, tu ajoutes une nouvelle colonne :
+
+```sql
+temps_estime
+```
+
+Les nouveaux voyages auront cette valeur, mais les anciens auront `NULL`.
+
+Un **backfill** consiste à parcourir tous les anciens voyages et calculer :
+
+```text
+temps_estime = distance / vitesse_moyenne
+```
+
+À la fin :
+
+| id | destination  | distance | temps_estime |
+| -- | ------------ | -------- | ------------ |
+| 1  | Yamoussoukro | 240      | 3h30         |
+| 2  | Bouaké       | 350      | 5h           |
+
+---
+
+## Pourquoi fait-on un backfill ?
+
+Principalement pour :
+
+* remplir une nouvelle colonne ;
+* recalculer une donnée devenue obsolète ;
+* corriger des données existantes ;
+* migrer d'un ancien format vers un nouveau.
+
+---
+
+## Dans Symfony
+
+On crée souvent une **commande Console** :
+
+```bash
+php bin/console app:backfill:temps-voyages
+```
+
+Cette commande :
+
+1. récupère tous les voyages ;
+2. calcule `temps_estime` ;
+3. sauvegarde les modifications.
+
+---
+
+## Exemple dans ton projet de transport
+
+Imaginons que tu ajoutes un champ :
+
+```php
+Reservation::canalVente
+```
+
+Avant, il n'existait pas.
+
+Tu veux que :
+
+* les réservations créées par l'application → `APPLICATION`
+* les réservations faites au guichet → `GUICHET`
+
+Toutes les anciennes réservations ont `NULL`.
+
+Tu lances alors un backfill qui analyse les anciennes données et remplit automatiquement ce champ.
+
+---
+
+## Différence avec une migration Doctrine
+
+Une **migration** modifie la structure de la base :
+
+```sql
+ALTER TABLE reservation
+ADD canal_vente VARCHAR(20);
+```
+
+Le **backfill** modifie les **données** :
+
+```text
+Réservation 1 → APPLICATION
+Réservation 2 → GUICHET
+Réservation 3 → APPLICATION
+...
+```
+
+On fait souvent les deux dans cet ordre :
+
+1. Migration → ajout de la colonne.
+2. Déploiement de la nouvelle version de l'application.
+3. Backfill → remplissage des anciennes données.
+4. (Éventuellement) rendre la colonne obligatoire (`NOT NULL`) une fois toutes les données complétées.
+
+---
+
+## Pourquoi est-ce important dans une application en production ?
+
+Sur une application utilisée par des clients, il peut y avoir des millions d'enregistrements. Si tu rends directement une nouvelle colonne obligatoire sans backfill, l'application risque de planter sur les anciennes données. Le backfill permet de faire évoluer la base progressivement, sans interrompre le service.
+
+Pour une application comme ton SaaS de transport, le backfill est particulièrement utile lorsque tu ajoutes de nouveaux champs (par exemple un nouveau statut, un indicateur métier ou un canal de vente) et que tu souhaites que toutes les anciennes données soient cohérentes avec les nouvelles règles métier.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Plus loin : la double authentification pour les administrateurs.
+
+## 2. Messenger sur mutualisé
+
+**Oui, ça marche** — le transport Doctrine est fait pour ça. Les messages vont dans une table, un cron consomme :
+
+```bash
+* * * * * cd /home/user/webpesee && php bin/console messenger:consume async --time-limit=55 --memory-limit=96M --quiet
+```
+
+`--time-limit` sous la minute du cron pour que les processus ne s'empilent pas ; même s'ils se chevauchent, le transport Doctrine verrouille en `SELECT … FOR UPDATE`, donc pas de double envoi. Trois pièges propres au mutualisé : le binaire PHP CLI diffère souvent du PHP web, certains hébergeurs limitent le cron à 5 ou 15 minutes, et il faut un `failure_transport` sinon un mail échoué disparaît sans bruit.
+
+**Mais je vous le déconseille ici.** Les 10 secondes venaient de ma machine, pas de votre code : `MAILER_DSN` pointait sur `localhost:1025` (Mailpit), qui ne tourne pas. Sur votre mutualisé le SMTP est local, un envoi prend quelques dizaines de millisecondes. Messenger ajouterait une table, un cron, un transport d'échec — et surtout un **délai** : si l'hébergeur plafonne le cron à 15 minutes, le lien de réinitialisation arrive un quart d'heure plus tard. Ce serait pire qu'aujourd'hui.
+
+J'ai corrigé la vraie cause : `MAILER_DSN=null://null` par défaut dans `.env`, le contenu des mails reste consultable dans le panneau « Mailer » du profiler, et Mailpit s'active dans `.env.local` pour qui le veut. La production renseigne son SMTP dans `.env.local`, comme `DATABASE_URL`.
+
+À rouvrir le jour où le SMTP est distant et lent, ou quand viendront les notifications de paiement aux planteurs — vous aurez de toute façon déjà un cron pour `app:paiements:reconcilier`, une ligne de plus ne coûtera rien.
+
+
+
+
+
+
+
+Hébergeur ssh grafikart
