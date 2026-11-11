@@ -1,5 +1,4 @@
-import './stimulus_bootstrap.js';
-import './bootstrap.js'
+import './stimulus_bootstrap.js'; // Anciennement './bootstrap.js' (renommé par la recette symfony/stimulus-bundle)
 import './css/app.scss'
 // ----- //
 import Button from "bootstrap/js/src/button"
