@@ -53,7 +53,7 @@
         </coverage>
     -->
     <extensions>
-        <bootstrap class="Symfony\Component\Panther\ServerExtension" />
         <bootstrap class="Zenstruck\Foundry\PHPUnit\FoundryExtension" />
+        <bootstrap class="Symfony\Component\Panther\ServerExtension" />
     </extensions>
 </phpunit>

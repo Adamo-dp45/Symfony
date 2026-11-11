@@ -649,16 +649,16 @@
         ]
     },
     "zenstruck/foundry": {
-        "version": "2.6",
+        "version": "2.16",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "2.6",
-            "ref": "50321333fa5e12324ac1d5a2aeb65fb276a6f9c8"
+            "version": "2.15",
+            "ref": "ce0c9d62f1d5192dcd958c2f2f21fd8d9c23dcaa"
         },
         "files": [
-            "./config/packages/zenstruck_foundry.yaml",
-            "./src/Story/AppStory.php"
+            "config/packages/zenstruck_foundry.yaml",
+            "src/Story/AppStory.php"
         ]
     },
     "zenstruck/messenger-monitor-bundle": {
