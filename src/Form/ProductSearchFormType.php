@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class ProductSearchFormType extends AbstractType {
 
-    public function buildForm(\Symfony\Component\Form\FormBuilderInterface $builder, array $options)
+    public function buildForm(\Symfony\Component\Form\FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('q', TextType::class, [
@@ -50,7 +50,7 @@ class ProductSearchFormType extends AbstractType {
         ;
     }
 
-    public function configureOptions(\Symfony\Component\OptionsResolver\OptionsResolver $resolver)
+    public function configureOptions(\Symfony\Component\OptionsResolver\OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => ProductSearch::class, // Class a utiliser pour representer le form
@@ -59,7 +59,7 @@ class ProductSearchFormType extends AbstractType {
         ]);
     }
 
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return ''; // Pour qu'il ne mette pas de préfix dans l'url, histoire d'avoir quelque chose de propre
     }

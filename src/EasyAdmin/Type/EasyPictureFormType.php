@@ -12,7 +12,7 @@ use Vich\UploaderBundle\Form\Type\VichImageType;
 class EasyPictureFormType extends AbstractType
 {
     #[Override]
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('file', VichImageType::class, [
             'label' => 'Image'

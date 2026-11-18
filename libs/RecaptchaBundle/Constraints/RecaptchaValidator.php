@@ -15,7 +15,7 @@ class RecaptchaValidator extends ConstraintValidator {
     {
     }
 
-    public function validate(mixed $value, \Symfony\Component\Validator\Constraint $constraint)
+    public function validate(mixed $value, \Symfony\Component\Validator\Constraint $constraint): void
     {
         $request = $this->requestStack->getCurrentRequest(); // Requête courante
         $recaptchaResponse = $request->request->get('g-recaptcha-response'); // request car on n'est en post

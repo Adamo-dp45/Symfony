@@ -5,7 +5,7 @@ framework:
             twilio: '%env(TWILIO_DSN)%'
             # twilio: '%env(TWILIO_DSN)%' -- Pour utiliser twilio
         channel_policy:
-            # use chat/slack, chat/telegram, sms/twilio or sms/nexmo
+            # use chat/slack, chat/telegram, sms/twilio or sms/vonage
             urgent: ['email']
             high: ['email']
             medium: ['email']

@@ -6,8 +6,8 @@ liip_imagine:
     # data_loader: default - !!
     # cache: default - !!
 
-    # twig: - !!
-    #    mode: lazy - Plus performant que legacy (désactivable en version 3), Génère les URLs dans Twig via un service runtime, pas à chaque chargement de page
+    twig: # Le mode 'legacy' (par défaut) est déprécié et disparaît en version 3
+        mode: lazy # Plus performant que legacy, Génère les URLs dans Twig via un service runtime, pas à chaque chargement de page
 
     # resolvers:
     #    default:

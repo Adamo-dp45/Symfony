@@ -16,7 +16,7 @@ class DeleteAccountFormType extends AbstractType
             ->add('password', PasswordType::class, [
                 'label' => 'Mot de passe',
                 'constraints' => [
-                    new NotBlank(['message' => 'Entrez votre mot de passe']),
+                    new NotBlank(message: 'Entrez votre mot de passe'),
                 ],
                 'attr' => [
                     'autocomplete' => 'current-password',

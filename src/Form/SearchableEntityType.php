@@ -16,7 +16,7 @@ class SearchableEntityType extends AbstractType
     {
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setRequired('class'); // On attend une propriété réquise
         $resolver->setDefaults([ // La valeur par défaut
@@ -32,7 +32,7 @@ class SearchableEntityType extends AbstractType
     /**
      * Pour transformer les données au niveau du formulaire
      */
-    public function buildForm(\Symfony\Component\Form\FormBuilderInterface $builder, array $options)
+    public function buildForm(\Symfony\Component\Form\FormBuilderInterface $builder, array $options): void
     {
         $builder->addModelTransformer(new CallbackTransformer(
             function(Collection $value): array {
@@ -52,7 +52,7 @@ class SearchableEntityType extends AbstractType
     /**
      * $options correspond au options qui vont être passer lorsqu'on initialise notre formType
      */
-    public function buildView(\Symfony\Component\Form\FormView $view, \Symfony\Component\Form\FormInterface $form, array $options)
+    public function buildView(\Symfony\Component\Form\FormView $view, \Symfony\Component\Form\FormInterface $form, array $options): void
     {
         $view->vars['expanded'] = false;
         $view->vars['placeholder'] = null;
@@ -68,7 +68,7 @@ class SearchableEntityType extends AbstractType
         $view->vars['attr']['data-label'] = $options['label_field'];
     }
 
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'choice'; // Permet d'avoir un select lors du rendu du template
     }

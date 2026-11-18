@@ -115,8 +115,16 @@ class PostAPINormalizer implements NormalizerInterface /*, NormalizerAwareInterf
 
     public function getSupportedTypes(?string $format): array
     {
+        /*
+            - La clé : le type qu'on peut normaliser (ici Post, la seule entité avec #[ApiAuthGroups], ou 'object' pour tout objet)
+            - La valeur : est-ce que la réponse de supportsNormalization() peut être mise en cache ?
+                - 'true'  : supportsNormalization() n'est appelée qu'une fois par type, le résultat sert ensuite pour TOUS les Post,
+                            sans regarder $data ni $context => le drapeau ALLREADY_CALLED_NORMALIZER serait ignoré (risque de boucle infinie)
+                - 'false' : supportsNormalization() est rappelée à chaque fois, obligatoire dès qu'elle dépend de $context ou de $data
+                - 'null'  : type non supporté
+        */
         return [
-            Post::class => true // Sera activer si on n'est dans une normalisation d'un Post
+            Post::class => false // Notre supportsNormalization() dépend du $context (anti-boucle) => pas de cache
         ];
     }
 

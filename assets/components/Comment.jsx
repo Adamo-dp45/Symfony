@@ -12,7 +12,8 @@ const VIEW = 'VIEW'
 const EDIT = 'EDIT'
 
 function Comments({post, user}) {
-    const {items: comments, setItems: setComment, load, loading, count, hasMore} = usePaginateFetch('/fr/api/comments?post=' + post)
+    // API Platform 4.4 : le filtre 'post' (IriFilter) attend l'IRI de l'article, plus son simple id
+    const {items: comments, setItems: setComment, load, loading, count, hasMore} = usePaginateFetch('/fr/api/comments?post=' + encodeURIComponent('/fr/api/posts/' + post))
 
     const addComment = useCallback(comment => {
         setComment(prev => [comment, ...prev])

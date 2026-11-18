@@ -133,7 +133,7 @@ class SecurityController extends AbstractController
     ): Response
     {
         if ($request->isMethod('POST')) {
-            $email = $request->get('email');
+            $email = $request->request->get('email');
             /**
              * @var User
              */

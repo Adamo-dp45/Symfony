@@ -20,15 +20,11 @@ class UserAvatarFormType extends AbstractType
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
-                    new File([
-                        'maxSize' => '2M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                            'image/webp',
-                        ],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide.',
-                    ])
+                    new File(maxSize: '2M', mimeTypes: [
+                        'image/jpeg',
+                        'image/png',
+                        'image/webp',
+                    ], mimeTypesMessage: 'Veuillez uploader une image valide.')
                 ],
             ])
             ->add('save', SubmitType::class, [

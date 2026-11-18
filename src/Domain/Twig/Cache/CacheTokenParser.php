@@ -14,7 +14,7 @@ class CacheTokenParser extends AbstractTokenParser { // Ou implements TokenParse
      * @param Token $token
      * @return Node
      */
-    public function parse(Token $token)
+    public function parse(Token $token): Node
     {
         $linero = $token->getLine(); // Le numéro de ligne
         $stream = $this->parser->getStream(); // Permet de lire l'ensemble de notre template twig au fur et à mésure
@@ -37,7 +37,7 @@ class CacheTokenParser extends AbstractTokenParser { // Ou implements TokenParse
      * Permet de retourner le nom de notre tag
      * @return string
      */
-    public function getTag()
+    public function getTag(): string
     {
         return 'ca';
     }

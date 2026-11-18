@@ -53,7 +53,11 @@ class UserOwnedDenormalizer implements DenormalizerInterface /*, DenormalizerAwa
     public function getSupportedTypes(?string $format): array
     {
         return [
-            Post::class => true // Pour limiter l'activation du denormalizer
+            Post::class => false /*
+                - La clé limite l'activation du denormalizer au type Post (UserOwnedInterface::class activerait aussi Category)
+                - 'false' car supportsDenormalization() dépend du $context (drapeau anti-boucle) : avec 'true' le Serializer
+                  mettrait en cache la première réponse et ne vérifierait plus le drapeau
+            */
         ];
     }
 

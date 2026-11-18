@@ -19,7 +19,7 @@ class CaptchaType extends AbstractType
     {
     }
 
-    public function configureOptions(\Symfony\Component\OptionsResolver\OptionsResolver $resolver)
+    public function configureOptions(\Symfony\Component\OptionsResolver\OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'constraints' => [
@@ -31,7 +31,7 @@ class CaptchaType extends AbstractType
         parent::configureOptions($resolver);
     }
 
-    public function buildForm(\Symfony\Component\Form\FormBuilderInterface $builder, array $options)
+    public function buildForm(\Symfony\Component\Form\FormBuilderInterface $builder, array $options): void
     {
         $builder->add('challenge', HiddenType::class, [
             'attr' => [
@@ -46,7 +46,7 @@ class CaptchaType extends AbstractType
         parent::buildForm($builder, $options);
     }
 
-    public function buildView(\Symfony\Component\Form\FormView $view, \Symfony\Component\Form\FormInterface $form, array $options)
+    public function buildView(\Symfony\Component\Form\FormView $view, \Symfony\Component\Form\FormInterface $form, array $options): void
     {
         $key = $this->challenge->generateKey();
         $view->vars['attr'] = [

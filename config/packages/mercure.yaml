@@ -3,6 +3,14 @@ mercure:
         default:
             url: '%env(MERCURE_URL)%' # L'url du hub
             public_url: '%env(MERCURE_PUBLIC_URL)%' # --
+            # Depuis MercureBundle 0.6 le protocole par défaut est '1.0' (cookie '__Secure-mercure_access_token',
+            # claims JWT 'iss', 'sub', 'client_id' obligatoires). On garde le protocole '0.x' pour rester compatible
+            # avec le hub local (bin/mercure) et le cookie 'mercureAuthorization' du MercureCookieGenerator.
+            protocol_version: '0.x'
             jwt:
                 secret: '%env(MERCURE_JWT_SECRET)%' # Le token utilisé pour s'authentifier au près du hub pour publier dans 'Bearer'
                 publish: '*'
+                # claims: -- Obligatoires seulement avec protocol_version: '1.0' (inutile en 0.x, change le contenu du token)
+                #    iss: '%env(MERCURE_JWT_ISSUER)%' # Doit être dans MERCURE_TRUSTED_ISSUERS côté hub
+                #    sub: 'app'
+                #    client_id: 'app'

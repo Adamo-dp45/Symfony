@@ -58,8 +58,9 @@ class EasyDashbordController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-home');
-        yield MenuItem::linkToCrud('Recette', 'fas fa-list', Recipe::class);
-        yield MenuItem::linkToCrud('Options', 'fas fa-list', Option::class); /*
+        // EasyAdmin 4.29 : linkToCrud('Label', 'icône', Entité::class) est déprécié, on pointe directement le CrudController
+        yield MenuItem::linkTo(RecipeCrudController::class, 'Recette', 'fas fa-list');
+        yield MenuItem::linkTo(OptionCrudController::class, 'Options', 'fas fa-list'); /*
             - yield MenuItem::linkToUrl('Google', 'fas fa-list', 'https://google.com'); -- Pour une url
         */
     }

@@ -41,7 +41,7 @@ class GithubAuthenticator extends OAuth2Authenticator implements AuthenticationE
     /**
      * Permet de spécifier comment on vas démarer une authentification, mais ici ce n'est pertinant car je l'utilise dans mon AppAuthenticator
      */
-    public function start(Request $request, AuthenticationException $authException = null): Response
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         return new RedirectResponse(
             $this->router->generate('app_login'),
@@ -56,7 +56,7 @@ class GithubAuthenticator extends OAuth2Authenticator implements AuthenticationE
      */
     public function supports(Request $request): ?bool
     {
-        return 'oauth_check' === $request->attributes->get('_route') && $request->get('service') === 'github'; // On vérifie que la route et le query parameter correspondent
+        return 'oauth_check' === $request->attributes->get('_route') && $request->attributes->get('service') === 'github'; // On vérifie que la route et le query parameter correspondent
     }
 
     /**

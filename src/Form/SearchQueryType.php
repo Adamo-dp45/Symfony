@@ -44,7 +44,7 @@ class SearchQueryType extends AbstractType
     /**
      * Pour avoir une url propre
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return '';
     }
