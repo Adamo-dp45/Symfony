@@ -2,7 +2,6 @@
 
 namespace App\Serializer;
 
-use App\Entity\Post;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
@@ -23,7 +22,11 @@ class FileDenormalizer implements DenormalizerInterface // Nous permet d'utilise
     public function getSupportedTypes(?string $format): array
     {
         return [
-            Post::class => true
+            File::class => false /*
+                - La clé est le type CIBLE de la dénormalisation : ici la propriété 'imageFile' (?File) du Post,
+                  et non le Post lui-même (avec Post::class ce denormalizer n'était jamais utilisé, DataUriNormalizer prenait le relais)
+                - 'false' car supportsDenormalization() dépend de $data (instanceof File)
+            */
         ];
     }
 }
