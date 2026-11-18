@@ -2,9 +2,8 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
-use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\PartialSearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SortFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -18,6 +17,7 @@ use ApiPlatform\Metadata\Parameters;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post as MetadataPost;
 use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\QueryParameter;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\OpenApi\Model\Response;
@@ -225,22 +225,38 @@ use Vich\UploaderBundle\Mapping\Attribute\UploadableField;
         ),
         new Mutation(name: 'update'),
         new DeleteMutation(name: 'delete')
+    ],
+
+    # Filtres (API Platform 4.4+) : des "paramètres" déclarés sur la ressource remplacent #[ApiFilter]
+    parameters: [
+        // ?title=symf -- Ancien ApiFilter(SearchFilter::class, properties: ['title' => 'partial'])
+        'title' => new QueryParameter(
+            filter: new PartialSearchFilter(caseSensitive: true), /*
+                - 'true' : simple LIKE, la casse dépend de la collation MySQL (utf8mb4_unicode_ci est insensible à la casse)
+                - 'false' : compare en LOWER() des deux côtés, insensible à la casse quelle que soit la base
+            */
+            description: 'Recherche partielle dans le titre'
+        ),
+        // ?order[id]=desc ou ?order[title]=asc -- Ancien ApiFilter(OrderFilter::class, properties: ['id', 'title'])
+        'order[:property]' => new QueryParameter( // ':property' est remplacé par chaque propriété de la liste
+            filter: new SortFilter(),
+            properties: ['id', 'title'] // Sans cette liste, toutes les propriétés de l'entité seraient triables
+        ),
     ]
 ),
-ApiFilter(SearchFilter::class, properties: [
-    'title' => 'partial'
-]),
-ApiFilter(OrderFilter::class, properties: ['id', 'title']),
 ApiAuthGroups([ // Pour le 'PostAPINormalizer', On le fais pour avoir quelque chose de générique
     'POST_EDIT' => ['read:collection:Owner'],
     'ROLE_USER' => ['read:collection:User'],
-])] /* - On a aussi 'BooleanFilter', 'RangeFilter', 'DateFilter', 'OrderFilter'
-        - 'exact' l'utilisateur doit entrer exactement la valeur qui correspond au niveau de la base de données
-        - 'partial' par défaut, contient la chaîne entrée
-        - 'start' commence par la chaîne
-        - 'end' se termine par la chaîne
-        - 'word_start' commence par la chaîne ou précédé d'un espace
-    - 'OrderFilter' permet de spécifié l'ordre de récupération des éléments
+])] /* - Filtres "paramètres" disponibles (ApiPlatform\Doctrine\Orm\Filter) :
+        - 'ExactFilter' l'utilisateur doit entrer exactement la valeur qui correspond au niveau de la base de données
+        - 'PartialSearchFilter' contient la chaîne entrée
+        - 'StartSearchFilter' commence par la chaîne
+        - 'EndSearchFilter' se termine par la chaîne
+        - 'WordStartSearchFilter' commence par la chaîne ou précédé d'un espace
+        - 'IriFilter' pour une relation (?post=/api/posts/1), 'SortFilter' pour l'ordre
+        - On a aussi 'BooleanFilter', 'RangeFilter', 'DateFilter', 'ComparisonFilter', 'FreeTextQueryFilter'..
+    - Avant API Platform 4.4 : #[ApiFilter(SearchFilter::class, properties: ['title' => 'partial'])] avec
+      les stratégies 'exact', 'partial', 'start', 'end', 'word_start' et 'OrderFilter' pour l'ordre
 */
 #[Uploadable()]
 class Post implements UserOwnedInterface

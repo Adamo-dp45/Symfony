@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
-use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\IriFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post as MetadataPost;
+use ApiPlatform\Metadata\QueryParameter;
 use App\Controller\Api\CommentCreateController;
 use App\Repository\CommentRepository;
 use Doctrine\DBAL\Types\Types;
@@ -43,9 +43,15 @@ use Symfony\Component\Validator\Constraints as Assert;
             requirements: ['id' => '\d+'],
             security: "is_granted('EDIT_COMMENT', object)"
         )
+    ],
+    parameters: [
+        // ?post=/fr/api/posts/1 -- Ancien ApiFilter(SearchFilter::class, properties: ['post' => 'exact'])
+        'post' => new QueryParameter(filter: new IriFilter()) /*
+            - 'IriFilter' pour filtrer sur une relation : attend l'IRI ('?post=1' n'est plus accepté)
+            - 'ExactFilter' accepterait '?post=1' mais renverrait une liste vide pour une IRI, sans erreur
+        */
     ]
-),
-ApiFilter(SearchFilter::class, properties: ['post' => 'exact'])]
+)]
 class Comment
 {
     #[ORM\Id]
